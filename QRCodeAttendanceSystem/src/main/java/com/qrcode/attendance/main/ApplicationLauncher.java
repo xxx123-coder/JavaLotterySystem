@@ -1,7 +1,7 @@
 package com.qrcode.attendance.main;
 
 import com.qrcode.attendance.config.AppConfig;
-import com.qrcode.attendance.gui.MainWindow;
+import com.qrcode.attendance.gui.frame.MainFrame;
 import com.qrcode.attendance.server.EmbeddedWebServer;
 import com.qrcode.attendance.util.LoggerUtil;
 import javax.swing.*;
@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 public class ApplicationLauncher {
 
     private static final Logger LOGGER = LoggerUtil.getLogger(ApplicationLauncher.class);
-    // 修正拼写错误：java.io.tmpdir 是正确的
     private static final String LOCK_FILE = System.getProperty("java.io.tmpdir") + "/qrcode_attendance.lock";
     private static FileLock lock;
     private static RandomAccessFile lockFile;
@@ -50,7 +49,7 @@ public class ApplicationLauncher {
             SwingUtilities.invokeLater(() -> {
                 try {
                     // 5. 创建并显示主窗口
-                    MainWindow mainWindow = new MainWindow();
+                    MainFrame mainWindow = new MainFrame();
                     mainWindow.setVisible(true);
 
                     // 设置主窗口到应用程序控制器
@@ -102,7 +101,7 @@ public class ApplicationLauncher {
     private static void initializeApplicationConfig() {
         try {
             // 初始化应用配置单例
-            AppConfig config = AppConfig.getInstance(); // 此行正常
+            AppConfig config = AppConfig.getInstance();
 
             // 初始化数据目录结构
             DataInitializer dataInitializer = new DataInitializer();
@@ -143,9 +142,9 @@ public class ApplicationLauncher {
      * 设置全局异常处理器
      */
     private static void setGlobalExceptionHandler() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            handleUncaughtException(throwable);
-        });
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
+                handleUncaughtException(throwable)
+        );
     }
 
     /**

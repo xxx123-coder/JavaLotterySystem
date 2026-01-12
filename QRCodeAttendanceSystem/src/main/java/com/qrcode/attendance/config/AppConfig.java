@@ -13,11 +13,14 @@ public class AppConfig {
 
     private static final String CONFIG_FILE = "application.properties";
     private static final String DEFAULT_CONFIG_FILE = "application-default.properties";
+    private static final String DATA_DIRECTORY_KEY = "app.data.directory";
+    private static final String DEFAULT_DATA_DIRECTORY = System.getProperty("user.home") + "/QRCodeAttendanceSystem";
 
     private final Properties properties;
     private final Map<String, Object> runtimeConfig;
     private final List<ConfigChangeListener> listeners;
     private final Map<String, String> configHistory;
+    private String dataDirectory;
 
     private static volatile AppConfig instance;
 
@@ -34,8 +37,10 @@ public class AppConfig {
         this.runtimeConfig = new ConcurrentHashMap<>();
         this.listeners = new CopyOnWriteArrayList<>();
         this.configHistory = new LinkedHashMap<>();
+        this.dataDirectory = DEFAULT_DATA_DIRECTORY;
 
         loadConfig();
+        initializeDataDirectory();
     }
 
     public static AppConfig getInstance() {
@@ -50,6 +55,52 @@ public class AppConfig {
     }
 
     /**
+     * 初始化数据目录
+     */
+    private void initializeDataDirectory() {
+        // 1. 从配置文件中获取数据目录
+        String configDataDir = getProperty(DATA_DIRECTORY_KEY);
+        if (configDataDir != null && !configDataDir.trim().isEmpty()) {
+            dataDirectory = configDataDir;
+        }
+
+        // 2. 如果配置中未指定，检查环境变量
+        else if (System.getenv("QR_ATTENDANCE_DATA_DIR") != null) {
+            dataDirectory = System.getenv("QR_ATTENDANCE_DATA_DIR");
+        }
+
+        // 3. 如果目录不存在，则创建
+        ensureDataDirectoryExists();
+
+        log("数据目录已设置为: " + dataDirectory);
+    }
+
+    /**
+     * 确保数据目录存在
+     */
+    private void ensureDataDirectoryExists() {
+        File dir = new File(dataDirectory);
+        if (!dir.exists()) {
+            boolean created = dir.mkdirs();
+            if (created) {
+                log("创建数据目录: " + dataDirectory);
+            } else {
+                logError("无法创建数据目录: " + dataDirectory);
+                // 回退到当前目录
+                dataDirectory = System.getProperty("user.dir") + "/data";
+                File fallbackDir = new File(dataDirectory);
+                if (!fallbackDir.exists()) {
+                    if (fallbackDir.mkdirs()) {
+                        log("使用回退数据目录: " + dataDirectory);
+                    } else {
+                        logError("无法创建回退数据目录: " + dataDirectory);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 从配置文件加载配置
      */
     private void loadConfig() {
@@ -60,6 +111,9 @@ public class AppConfig {
             if (defaultStream != null) {
                 properties.load(defaultStream);
                 defaultStream.close();
+                log("默认配置加载成功: " + DEFAULT_CONFIG_FILE);
+            } else {
+                logWarning("默认配置文件未找到: " + DEFAULT_CONFIG_FILE);
             }
 
             // 2. 加载用户配置（覆盖默认配置）
@@ -67,10 +121,11 @@ public class AppConfig {
             if (configFile.exists()) {
                 try (InputStream is = new FileInputStream(configFile)) {
                     properties.load(is);
-                    log("配置文件加载成功: " + CONFIG_FILE);
+                    log("用户配置文件加载成功: " + CONFIG_FILE);
                 }
             } else {
-                // 如果配置文件不存在，使用默认值
+                // 如果配置文件不存在，使用默认值并创建配置文件
+                log("配置文件不存在，使用默认值并创建: " + CONFIG_FILE);
                 setDefaultValues();
                 saveConfig();
             }
@@ -91,19 +146,54 @@ public class AppConfig {
      * 设置默认配置值
      */
     private void setDefaultValues() {
+        // 应用基本信息
         setPropertyIfAbsent("app.name", "QRCodeAttendance");
         setPropertyIfAbsent("app.version", "1.0.0");
         setPropertyIfAbsent("app.env", "development");
         setPropertyIfAbsent("app.debug", "true");
         setPropertyIfAbsent("app.locale", "zh_CN");
         setPropertyIfAbsent("app.timezone", "Asia/Shanghai");
+
+        // 数据目录配置
+        setPropertyIfAbsent(DATA_DIRECTORY_KEY, DEFAULT_DATA_DIRECTORY);
+
+        // 应用行为配置
         setPropertyIfAbsent("app.max.retry", "3");
         setPropertyIfAbsent("app.cache.enabled", "true");
         setPropertyIfAbsent("app.cache.size", "1000");
         setPropertyIfAbsent("app.cache.ttl", "3600");
+
+        // 日志配置
         setPropertyIfAbsent("app.log.level", "INFO");
         setPropertyIfAbsent("app.log.path", "./logs");
         setPropertyIfAbsent("app.log.retain.days", "30");
+
+        // 服务器配置
+        setPropertyIfAbsent("server.port", "8080");
+        setPropertyIfAbsent("server.host", "0.0.0.0");
+        setPropertyIfAbsent("server.max.threads", "50");
+        setPropertyIfAbsent("server.idle.timeout", "30000");
+
+        // 数据库配置
+        setPropertyIfAbsent("db.type", "json");
+        setPropertyIfAbsent("db.json.path", "./data");
+        setPropertyIfAbsent("db.backup.enabled", "true");
+        setPropertyIfAbsent("db.backup.interval.hours", "24");
+
+        // QR码配置
+        setPropertyIfAbsent("qrcode.width", "300");
+        setPropertyIfAbsent("qrcode.height", "300");
+        setPropertyIfAbsent("qrcode.format", "PNG");
+        setPropertyIfAbsent("qrcode.expiry.minutes", "5");
+
+        // 导出配置
+        setPropertyIfAbsent("export.format", "excel");
+        setPropertyIfAbsent("export.default.path", "./exports");
+
+        // 安全配置
+        setPropertyIfAbsent("security.enabled", "true");
+        setPropertyIfAbsent("security.max.login.attempts", "5");
+        setPropertyIfAbsent("security.session.timeout.minutes", "30");
     }
 
     private void setPropertyIfAbsent(String key, String value) {
@@ -136,12 +226,12 @@ public class AppConfig {
         return defaultValue;
     }
 
-    @SuppressWarnings("unused")
     public int getIntProperty(String key, int defaultValue) {
         try {
             String value = getProperty(key);
             return value != null ? Integer.parseInt(value) : defaultValue;
         } catch (NumberFormatException e) {
+            logWarning("配置项 " + key + " 不是有效的整数，使用默认值: " + defaultValue);
             return defaultValue;
         }
     }
@@ -158,6 +248,7 @@ public class AppConfig {
             String value = getProperty(key);
             return value != null ? Long.parseLong(value) : defaultValue;
         } catch (NumberFormatException e) {
+            logWarning("配置项 " + key + " 不是有效的长整数，使用默认值: " + defaultValue);
             return defaultValue;
         }
     }
@@ -172,6 +263,36 @@ public class AppConfig {
     }
 
     /**
+     * 获取数据目录路径
+     * @return 数据目录的完整路径
+     */
+    public String getDataDirectory() {
+        return dataDirectory;
+    }
+
+    /**
+     * 设置数据目录路径
+     * @param dataDirectory 新的数据目录路径
+     */
+    @SuppressWarnings("unused")
+    public void setDataDirectory(String dataDirectory) {
+        String oldDirectory = this.dataDirectory;
+        this.dataDirectory = dataDirectory;
+
+        // 更新配置文件
+        setProperty(DATA_DIRECTORY_KEY, dataDirectory);
+
+        // 确保目录存在
+        ensureDataDirectoryExists();
+
+        // 记录变更
+        String timestamp = new java.util.Date().toString();
+        configHistory.put(timestamp + ":data.directory", oldDirectory + " -> " + dataDirectory);
+
+        log("数据目录已更新: " + oldDirectory + " -> " + dataDirectory);
+    }
+
+    /**
      * 设置配置项（动态更新）
      */
     public void setProperty(String key, String value) {
@@ -179,6 +300,12 @@ public class AppConfig {
 
         // 添加到运行时配置
         runtimeConfig.put(key, value);
+
+        // 如果是数据目录相关配置，需要更新内存中的数据目录
+        if (DATA_DIRECTORY_KEY.equals(key)) {
+            this.dataDirectory = value;
+            ensureDataDirectoryExists();
+        }
 
         // 记录历史
         String timestamp = new java.util.Date().toString();
@@ -256,6 +383,14 @@ public class AppConfig {
                 return false;
             }
         });
+        validators.put("server.port", value -> {
+            try {
+                int port = Integer.parseInt(value);
+                return port > 0 && port <= 65535;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        });
 
         // 执行验证
         for (Map.Entry<String, Validator> entry : validators.entrySet()) {
@@ -263,6 +398,11 @@ public class AppConfig {
             String value = getProperty(key);
             if (value != null && !entry.getValue().validate(value)) {
                 logWarning("配置项验证失败: " + key + " = " + value);
+                // 对于关键配置项，设置默认值
+                if ("server.port".equals(key)) {
+                    setProperty(key, "8080");
+                    logWarning("重置 " + key + " 为默认值: 8080");
+                }
             }
         }
     }
@@ -281,6 +421,7 @@ public class AppConfig {
     public void printAllConfig() {
         System.out.println("========== 应用程序配置 ==========");
         System.out.println("配置文件: " + CONFIG_FILE);
+        System.out.println("数据目录: " + dataDirectory);
         System.out.println("加载时间: " + new Date());
         System.out.println("----------------------------------");
 
@@ -321,6 +462,7 @@ public class AppConfig {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             writer.println("# 导出时间: " + new Date());
             writer.println("# 应用程序配置");
+            writer.println("# 数据目录: " + dataDirectory);
             writer.println();
 
             for (String key : properties.stringPropertyNames()) {
@@ -351,19 +493,61 @@ public class AppConfig {
     @SuppressWarnings("unused")
     public void reload() {
         properties.clear();
+        runtimeConfig.clear();
         loadConfig();
+        initializeDataDirectory();
         log("配置已重新加载");
     }
 
+    /**
+     * 获取服务器端口
+     */
+    @SuppressWarnings("unused")
+    public int getServerPort() {
+        return getIntProperty("server.port", 8080);
+    }
+
+    /**
+     * 获取日志级别
+     */
+    @SuppressWarnings("unused")
+    public String getLogLevel() {
+        return getProperty("app.log.level", "INFO");
+    }
+
+    /**
+     * 获取应用名称
+     */
+    @SuppressWarnings("unused")
+    public String getAppName() {
+        return getProperty("app.name", "QRCodeAttendance");
+    }
+
+    /**
+     * 获取应用版本
+     */
+    @SuppressWarnings("unused")
+    public String getAppVersion() {
+        return getProperty("app.version", "1.0.0");
+    }
+
+    /**
+     * 获取QR码过期时间（分钟）
+     */
+    @SuppressWarnings("unused")
+    public int getQRCodeExpiryMinutes() {
+        return getIntProperty("qrcode.expiry.minutes", 5);
+    }
+
     private void log(String message) {
-        System.out.println("[AppConfig] " + message);
+        System.out.println("[AppConfig INFO] " + new Date() + " - " + message);
     }
 
     private void logWarning(String message) {
-        System.out.println("[AppConfig WARN] " + message);
+        System.out.println("[AppConfig WARN] " + new Date() + " - " + message);
     }
 
     private void logError(String message) {
-        System.err.println("[AppConfig ERROR] " + message);
+        System.err.println("[AppConfig ERROR] " + new Date() + " - " + message);
     }
 }

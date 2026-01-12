@@ -1,6 +1,5 @@
 package com.qrcode.attendance.main;
 
-// 添加必要的导入语句
 import com.qrcode.attendance.config.AppConfig;
 import com.qrcode.attendance.gui.MainWindow;
 import com.qrcode.attendance.server.EmbeddedWebServer;
@@ -33,9 +32,9 @@ public class AttendanceApplication {
     private StudentService studentService;
     private AttendanceService attendanceService;
 
-    // 应用程序状态 - 移除 final 修饰符，因为状态需要修改
-    private AtomicBoolean isRunning = new AtomicBoolean(false);
-    private AtomicBoolean isPaused = new AtomicBoolean(false);
+    // 应用程序状态
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private final AtomicBoolean isPaused = new AtomicBoolean(false);
     private ApplicationState currentState = ApplicationState.STOPPED;
 
     /**
@@ -136,7 +135,7 @@ public class AttendanceApplication {
 
         } catch (Exception e) {
             LOGGER.severe("业务服务初始化失败: " + e.getMessage());
-            throw e; // 重新抛出异常
+            throw e;
         }
     }
 
@@ -244,8 +243,7 @@ public class AttendanceApplication {
      * 用户点击窗口关闭按钮时调用
      */
     public void handleWindowClosing() {
-        // 注意：mainWindow 可能为 null，所以使用 null 作为父组件
-        int option = JOptionPane.showConfirmDialog(null,
+        int option = JOptionPane.showConfirmDialog(mainWindow,
                 "确定要退出应用程序吗？",
                 "退出确认",
                 JOptionPane.YES_NO_OPTION,
@@ -253,8 +251,8 @@ public class AttendanceApplication {
 
         // 用户确认退出
         if (option == JOptionPane.YES_OPTION) {
-            stop();       // 停止应用程序
-            System.exit(0); // 退出JVM
+            stop();
+            System.exit(0);
         }
     }
 
@@ -288,7 +286,6 @@ public class AttendanceApplication {
      */
     private void notifyStateChange(ApplicationState state) {
         // 这里可以添加事件总线或监听器模式的实现
-        // 例如：EventBus.post(new ApplicationStateEvent(state));
     }
 
     /***************************** 状态查询方法 *****************************/
