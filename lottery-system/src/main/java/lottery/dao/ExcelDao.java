@@ -3,43 +3,35 @@ package lottery.dao;
 import lottery.model.User;
 import lottery.model.Ticket;
 import lottery.model.LotteryResult;
-import lottery.util.FileUtils;
+import lottery.util.PathManager;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ExcelDao {
-    // Excel文件路径 - 使用相对路径
-    private static final String USER_FILE = "data/users.xlsx";
-    private static final String TICKET_FILE = "data/tickets.xlsx";
-    private static final String RESULT_FILE = "data/results.xlsx";
-
     // 日期格式化器
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    // 调试标志
+    private boolean debugMode = false;
+
     /**
-     * 获取用户文件完整路径
+     * 设置调试模式
      */
-    private String getUserFilePath() {
-        return FileUtils.getDataFilePath("users.xlsx");
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     /**
-     * 获取彩票文件完整路径
+     * 调试输出
      */
-    private String getTicketFilePath() {
-        return FileUtils.getDataFilePath("tickets.xlsx");
-    }
-
-    /**
-     * 获取结果文件完整路径
-     */
-    private String getResultFilePath() {
-        return FileUtils.getDataFilePath("results.xlsx");
+    private void debug(String message) {
+        if (debugMode) {
+            System.out.println("[DEBUG-ExcelDao] " + message);
+        }
     }
 
     /**
@@ -47,18 +39,21 @@ public class ExcelDao {
      */
     public List<User> loadUsers() {
         List<User> users = new ArrayList<>();
-        String filePath = getUserFilePath();
+        String filePath = PathManager.getUserFilePath();
+
+        debug("加载用户数据，文件路径: " + filePath);
 
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                System.out.println("用户文件不存在，将创建新文件");
+                debug("用户文件不存在，将创建新文件");
                 createExcelFiles();
                 return users;
             }
 
             try (FileInputStream fis = new FileInputStream(filePath);
                  Workbook workbook = new XSSFWorkbook(fis)) {
+
                 Sheet sheet = workbook.getSheetAt(0);
                 Iterator<Row> rowIterator = sheet.iterator();
 
@@ -79,9 +74,16 @@ public class ExcelDao {
 
                     users.add(user);
                 }
+
+                debug("成功加载 " + users.size() + " 个用户");
             }
+
+        } catch (FileNotFoundException e) {
+            debug("用户文件不存在，将创建新文件: " + filePath);
+            createExcelFiles();
         } catch (IOException e) {
             System.err.println("加载用户数据失败: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return users;
@@ -91,7 +93,9 @@ public class ExcelDao {
      * 保存用户列表到Excel
      */
     public void saveUsers(List<User> users) {
-        String filePath = getUserFilePath();
+        String filePath = PathManager.getUserFilePath();
+        debug("保存用户数据到: " + filePath + " (用户数: " + users.size() + ")");
+
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Users");
 
@@ -116,14 +120,17 @@ public class ExcelDao {
             }
 
             // 确保目录存在
-            FileUtils.ensureFileDirectory(filePath);
+            PathManager.ensureDirectoryExists(new File(filePath).getParent());
 
             // 写入文件
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 workbook.write(fos);
+                debug("用户数据保存成功: " + filePath);
             }
+
         } catch (IOException e) {
             System.err.println("保存用户数据失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -131,6 +138,7 @@ public class ExcelDao {
      * 添加单个用户到Excel
      */
     public void addUser(User user) {
+        debug("添加单个用户: " + user.getUsername());
         List<User> users = loadUsers();
         users.add(user);
         saveUsers(users);
@@ -141,18 +149,21 @@ public class ExcelDao {
      */
     public List<Ticket> loadTickets() {
         List<Ticket> tickets = new ArrayList<>();
-        String filePath = getTicketFilePath();
+        String filePath = PathManager.getTicketFilePath();
+
+        debug("加载彩票数据，文件路径: " + filePath);
 
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                System.out.println("彩票文件不存在，将创建新文件");
+                debug("彩票文件不存在，将创建新文件");
                 createExcelFiles();
                 return tickets;
             }
 
             try (FileInputStream fis = new FileInputStream(filePath);
                  Workbook workbook = new XSSFWorkbook(fis)) {
+
                 Sheet sheet = workbook.getSheetAt(0);
                 Iterator<Row> rowIterator = sheet.iterator();
 
@@ -176,7 +187,7 @@ public class ExcelDao {
                         try {
                             ticket.setPurchaseTime(dateFormat.parse(dateStr));
                         } catch (Exception e) {
-                            System.err.println("解析购买时间失败: " + dateStr);
+                            debug("解析购买时间失败: " + dateStr);
                         }
                     }
 
@@ -186,9 +197,16 @@ public class ExcelDao {
 
                     tickets.add(ticket);
                 }
+
+                debug("成功加载 " + tickets.size() + " 张彩票");
             }
+
+        } catch (FileNotFoundException e) {
+            debug("彩票文件不存在，将创建新文件: " + filePath);
+            createExcelFiles();
         } catch (IOException e) {
             System.err.println("加载彩票数据失败: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return tickets;
@@ -198,7 +216,9 @@ public class ExcelDao {
      * 保存彩票列表到Excel
      */
     public void saveTickets(List<Ticket> tickets) {
-        String filePath = getTicketFilePath();
+        String filePath = PathManager.getTicketFilePath();
+        debug("保存彩票数据到: " + filePath + " (彩票数: " + tickets.size() + ")");
+
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Tickets");
 
@@ -231,14 +251,17 @@ public class ExcelDao {
             }
 
             // 确保目录存在
-            FileUtils.ensureFileDirectory(filePath);
+            PathManager.ensureDirectoryExists(new File(filePath).getParent());
 
             // 写入文件
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 workbook.write(fos);
+                debug("彩票数据保存成功: " + filePath);
             }
+
         } catch (IOException e) {
             System.err.println("保存彩票数据失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -246,6 +269,7 @@ public class ExcelDao {
      * 添加单个彩票到Excel
      */
     public void addTicket(Ticket ticket) {
+        debug("添加单个彩票: ID=" + ticket.getId() + ", 用户ID=" + ticket.getUserId());
         List<Ticket> tickets = loadTickets();
         tickets.add(ticket);
         saveTickets(tickets);
@@ -256,18 +280,21 @@ public class ExcelDao {
      */
     public List<LotteryResult> loadResults() {
         List<LotteryResult> results = new ArrayList<>();
-        String filePath = getResultFilePath();
+        String filePath = PathManager.getResultFilePath();
+
+        debug("加载结果数据，文件路径: " + filePath);
 
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                System.out.println("结果文件不存在，将创建新文件");
+                debug("结果文件不存在，将创建新文件");
                 createExcelFiles();
                 return results;
             }
 
             try (FileInputStream fis = new FileInputStream(filePath);
                  Workbook workbook = new XSSFWorkbook(fis)) {
+
                 Sheet sheet = workbook.getSheetAt(0);
                 Iterator<Row> rowIterator = sheet.iterator();
 
@@ -289,7 +316,7 @@ public class ExcelDao {
                         try {
                             result.setDrawTime(dateFormat.parse(dateStr));
                         } catch (Exception e) {
-                            System.err.println("解析抽奖时间失败: " + dateStr);
+                            debug("解析抽奖时间失败: " + dateStr);
                         }
                     }
 
@@ -299,9 +326,16 @@ public class ExcelDao {
 
                     results.add(result);
                 }
+
+                debug("成功加载 " + results.size() + " 个结果");
             }
+
+        } catch (FileNotFoundException e) {
+            debug("结果文件不存在，将创建新文件: " + filePath);
+            createExcelFiles();
         } catch (IOException e) {
             System.err.println("加载抽奖结果失败: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return results;
@@ -311,7 +345,9 @@ public class ExcelDao {
      * 保存结果列表到Excel
      */
     public void saveResults(List<LotteryResult> results) {
-        String filePath = getResultFilePath();
+        String filePath = PathManager.getResultFilePath();
+        debug("保存结果数据到: " + filePath + " (结果数: " + results.size() + ")");
+
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Results");
 
@@ -344,14 +380,17 @@ public class ExcelDao {
             }
 
             // 确保目录存在
-            FileUtils.ensureFileDirectory(filePath);
+            PathManager.ensureDirectoryExists(new File(filePath).getParent());
 
             // 写入文件
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 workbook.write(fos);
+                debug("结果数据保存成功: " + filePath);
             }
+
         } catch (IOException e) {
             System.err.println("保存抽奖结果失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -359,6 +398,7 @@ public class ExcelDao {
      * 添加单个结果到Excel
      */
     public void addResult(LotteryResult result) {
+        debug("添加单个结果: ID=" + result.getId() + ", 中奖号码=" + result.getWinningNumbers());
         List<LotteryResult> results = loadResults();
         results.add(result);
         saveResults(results);
@@ -368,42 +408,103 @@ public class ExcelDao {
      * 如果Excel文件不存在则创建
      */
     public void createExcelFiles() {
-        String userFilePath = getUserFilePath();
-        String ticketFilePath = getTicketFilePath();
-        String resultFilePath = getResultFilePath();
+        debug("开始创建Excel文件");
 
-        createFileIfNotExists(userFilePath, "Users",
-                new String[]{"ID", "Username", "Password", "Balance", "Phone"});
-        createFileIfNotExists(ticketFilePath, "Tickets",
-                new String[]{"ID", "UserID", "Numbers", "BetCount", "PurchaseTime", "IsManual"});
-        createFileIfNotExists(resultFilePath, "Results",
-                new String[]{"ID", "WinningNumbers", "DrawTime", "WinnerUserId", "PrizeLevel", "Multiplier"});
+        try {
+            // 首先确保数据目录存在
+            String dataDir = PathManager.getDataDir();
+            debug("数据目录: " + dataDir);
+
+            File dataDirFile = new File(dataDir);
+            if (!dataDirFile.exists()) {
+                boolean created = dataDirFile.mkdirs();
+                if (created) {
+                    debug("创建数据目录: " + dataDir);
+                } else {
+                    debug("无法创建数据目录: " + dataDir);
+                }
+            }
+
+            String userFilePath = PathManager.getUserFilePath();
+            String ticketFilePath = PathManager.getTicketFilePath();
+            String resultFilePath = PathManager.getResultFilePath();
+
+            debug("用户文件路径: " + userFilePath);
+            debug("彩票文件路径: " + ticketFilePath);
+            debug("结果文件路径: " + resultFilePath);
+
+            // 创建文件（如果不存在）
+            createFileIfNotExists(userFilePath, "Users",
+                    new String[]{"ID", "Username", "Password", "Balance", "Phone"});
+
+            createFileIfNotExists(ticketFilePath, "Tickets",
+                    new String[]{"ID", "UserID", "Numbers", "BetCount", "PurchaseTime", "IsManual"});
+
+            createFileIfNotExists(resultFilePath, "Results",
+                    new String[]{"ID", "WinningNumbers", "DrawTime", "WinnerUserId", "PrizeLevel", "Multiplier"});
+
+            debug("Excel文件创建完成");
+
+        } catch (Exception e) {
+            System.err.println("创建Excel文件时发生错误: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("无法创建Excel文件，请检查目录权限");
+        }
     }
 
     /**
-     * 辅助方法：创建Excel文件
+     * 辅助方法：创建Excel文件（如果不存在）
      */
     private void createFileIfNotExists(String filePath, String sheetName, String[] headers) {
         File file = new File(filePath);
-        if (!file.exists()) {
-            try (Workbook workbook = new XSSFWorkbook()) {
-                Sheet sheet = workbook.createSheet(sheetName);
-                Row headerRow = sheet.createRow(0);
 
-                for (int i = 0; i < headers.length; i++) {
-                    headerRow.createCell(i).setCellValue(headers[i]);
-                }
+        if (file.exists()) {
+            debug("Excel文件已存在: " + filePath);
+            return;
+        }
 
-                // 确保目录存在
-                FileUtils.ensureFileDirectory(filePath);
+        debug("创建Excel文件: " + filePath);
 
-                try (FileOutputStream fos = new FileOutputStream(file)) {
-                    workbook.write(fos);
-                }
-                System.out.println("已创建文件: " + filePath);
-            } catch (IOException e) {
-                System.err.println("创建文件失败: " + filePath + ", 错误: " + e.getMessage());
+        // 确保父目录存在
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            boolean dirsCreated = parentDir.mkdirs();
+            if (!dirsCreated) {
+                debug("无法创建父目录: " + parentDir.getAbsolutePath());
+                return;
             }
+        }
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet(sheetName);
+            Row headerRow = sheet.createRow(0);
+
+            // 创建表头
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            // 设置列宽
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // 写入文件
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                workbook.write(fos);
+                System.out.println("[INFO] 已创建Excel文件: " + filePath);
+            }
+
+        } catch (IOException e) {
+            System.err.println("创建Excel文件失败: " + filePath + ", 错误: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -412,6 +513,7 @@ public class ExcelDao {
      */
     public int getNextId(String fileType) {
         int maxId = 0;
+
         try {
             switch (fileType.toLowerCase()) {
                 case "users":
@@ -436,10 +538,13 @@ public class ExcelDao {
                     throw new IllegalArgumentException("未知的文件类型: " + fileType);
             }
         } catch (Exception e) {
-            // 如果文件为空或不存在，从0开始
+            debug("获取下一个ID时发生异常，返回默认值1: " + e.getMessage());
             return 1;
         }
-        return maxId + 1;
+
+        int nextId = maxId + 1;
+        debug("获取下一个ID: 类型=" + fileType + ", 最大ID=" + maxId + ", 下一个ID=" + nextId);
+        return nextId;
     }
 
     /**
@@ -449,6 +554,7 @@ public class ExcelDao {
         if (cell == null) {
             return "";
         }
+
         switch (cell.getCellType()) {
             case STRING:
                 return cell.getStringCellValue();
@@ -481,6 +587,7 @@ public class ExcelDao {
         if (cell == null) {
             return 0.0;
         }
+
         switch (cell.getCellType()) {
             case NUMERIC:
                 return cell.getNumericCellValue();

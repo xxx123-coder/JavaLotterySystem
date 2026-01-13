@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩票系统</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-dice-six"></i>
+            <h1>彩票系统</h1>
+        </div>
+        <nav class="nav">
+            <a href="/" class="nav-link active">
+                <i class="fas fa-home"></i> 首页
+            </a>
+            <a href="/login" class="nav-link">
+                <i class="fas fa-sign-in-alt"></i> 登录
+            </a>
+            <a href="/register" class="nav-link">
+                <i class="fas fa-user-plus"></i> 注册
+            </a>
+            <a href="/draw" class="nav-link">
+                <i class="fas fa-trophy"></i> 抽奖
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="hero">
+            <div class="hero-content">
+                <h2>欢迎来到彩票系统</h2>
+                <p class="subtitle">试试你的运气，赢取百万大奖！</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> 立即注册
+                    </a>
+                    <a href="/login" class="btn btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i> 登录账户
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="lottery-ball-animation">
+                    <div class="ball">7</div>
+                    <div class="ball">15</div>
+                    <div class="ball">22</div>
+                    <div class="ball">31</div>
+                    <div class="ball">8</div>
+                    <div class="ball">19</div>
+                    <div class="ball">36</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2 class="section-title">系统功能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>用户管理</h3>
+                    <p>注册、登录、账户充值、余额查询</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h3>彩票购买</h3>
+                    <p>手动选号或随机选号，支持多倍投注</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>抽奖系统</h3>
+                    <p>自动抽奖，即时显示中奖号码和结果</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>中奖通知</h3>
+                    <p>实时通知中奖信息，查看中奖记录</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="rules">
+            <h2 class="section-title">游戏规则</h2>
+            <div class="rules-content">
+                <div class="rule-item">
+                    <h3><i class="fas fa-hashtag"></i> 选号规则</h3>
+                    <p>选择7个1-36之间的不重复数字</p>
+                </div>
+                <div class="rule-item">
+                    <h3><i class="fas fa-money-bill-wave"></i> 价格</h3>
+                    <p>每注价格：¥2.00</p>
+                </div>
+                <div class="rule-item">
+                    <h3><i class="fas fa-award"></i> 中奖等级</h3>
+                    <ul>
+                        <li>特等奖：7个号码全中</li>
+                        <li>一等奖：6个号码全中</li>
+                        <li>二等奖：5个号码全中</li>
+                        <li>三等奖：4个号码全中</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="latest-results">
+            <h2 class="section-title">最近开奖结果</h2>
+            <div id="results-container">
+                <p>正在加载最新结果...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>彩票系统</h3>
+                <p>© 2023 彩票系统. 版权所有.</p>
+                <p>仅供学习使用，请勿用于商业用途</p>
+            </div>
+            <div class="footer-section">
+                <h3>联系方式</h3>
+                <p>Email: support@lottery.com</p>
+                <p>电话: 400-123-4567</p>
+            </div>
+            <div class="footer-section">
+                <h3>技术支持</h3>
+                <p>Java + Jetty + Apache POI</p>
+                <p>版本: 1.0.0</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script src="js/lottery.js"></script>
+<script>
+    // 加载最新结果
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/results')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('results-container');
+                if (data.results && data.results.length > 0) {
+                    let html = '<div class="results-list">';
+                    data.results.forEach(result => {
+                        html += `
+                                <div class="result-item">
+                                    <div class="result-numbers">
+                                        ${result.winningNumbers.split(',').map(num =>
+                            `<span class="number-ball">${num}</span>`
+                        ).join('')}
+                                    </div>
+                                    <div class="result-info">
+                                        <span>${result.prizeLevel}</span>
+                                        <span>${new Date(result.drawTime).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p>暂无开奖结果</p>';
+                }
+            })
+            .catch(error => {
+                console.error('加载结果失败:', error);
+                document.getElementById('results-container').innerHTML =
+                    '<p>无法加载最新结果</p>';
+            });
+    });
+</script>
+</body>
+</html>

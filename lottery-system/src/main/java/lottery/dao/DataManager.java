@@ -3,6 +3,9 @@ package lottery.dao;
 import lottery.model.User;
 import lottery.model.Ticket;
 import lottery.model.LotteryResult;
+import lottery.util.PathManager;
+
+import java.io.File;
 import java.util.*;
 
 public class DataManager {
@@ -20,14 +23,58 @@ public class DataManager {
     /**
      * 私有构造方法
      */
+    // 在DataManager.java的构造方法中添加路径调试信息
     private DataManager() {
         excelDao = new ExcelDao();
+        excelDao.setDebugMode(true); // 调试模式，生产环境设为false
+
         userCache = new ArrayList<>();
         ticketCache = new ArrayList<>();
         resultCache = new ArrayList<>();
 
+        // 打印详细的路径信息
+        System.out.println("\n[INFO] ========== 初始化DataManager ==========");
+        PathManager.printPathInfo(); // 打印详细的路径信息
+
+        // 检查数据目录
+        String dataDir = PathManager.getDataDir();
+        System.out.println("[INFO] 数据目录: " + dataDir);
+
+        // 尝试创建必要的目录
+        File dataDirFile = new File(dataDir);
+        if (!dataDirFile.exists()) {
+            System.out.println("[INFO] 创建数据目录...");
+            boolean created = dataDirFile.mkdirs();
+            if (created) {
+                System.out.println("[INFO] 数据目录创建成功: " + dataDir);
+            } else {
+                System.err.println("[ERROR] 无法创建数据目录: " + dataDir);
+                System.out.println("[INFO] 尝试在当前目录工作...");
+            }
+        }
+
         // 确保Excel文件存在
-        excelDao.createExcelFiles();
+        try {
+            System.out.println("[INFO] 检查Excel文件...");
+            excelDao.createExcelFiles();
+            System.out.println("[INFO] Excel文件检查完成");
+        } catch (Exception e) {
+            System.err.println("[ERROR] 创建Excel文件失败: " + e.getMessage());
+            System.out.println("[INFO] 继续运行，使用空数据集...");
+        }
+
+        // 加载数据
+        System.out.println("[INFO] 加载数据...");
+        try {
+            loadAllData();
+            System.out.println("[INFO] 数据加载完成");
+        } catch (Exception e) {
+            System.err.println("[ERROR] 加载数据失败: " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("[INFO] 使用空数据集继续...");
+        }
+
+        System.out.println("[INFO] DataManager初始化完成\n");
     }
 
     /**
