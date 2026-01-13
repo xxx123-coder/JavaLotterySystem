@@ -13,6 +13,7 @@ public class Ticket {
     private int betCount;       // 投注数
     private Date purchaseTime;  // 购买时间
     private boolean isManual;   // 是否手动选号
+    private boolean drawn;
 
     /**
      * 无参构造函数
@@ -97,5 +98,12 @@ public class Ticket {
                 ", purchaseTime=" + purchaseTime +
                 ", isManual=" + isManual +
                 '}';
+    }
+    public boolean isDrawn() {
+        return this.drawn; // 假设有 drawn 字段
+    }
+
+    public void setDrawn(boolean drawn) {
+        this.drawn = drawn;
     }
 }

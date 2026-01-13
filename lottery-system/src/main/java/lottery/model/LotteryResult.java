@@ -13,6 +13,8 @@ public class LotteryResult {
     private int winnerUserId;       // 中奖用户ID
     private String prizeLevel;      // 中奖等级（特等奖/一等奖）
     private int multiplier;         // 中奖倍数
+    private int ticketId;
+    private double prizeAmount;
 
     /**
      * 无参构造函数
@@ -98,5 +100,16 @@ public class LotteryResult {
                 ", prizeLevel='" + prizeLevel + '\'' +
                 ", multiplier=" + multiplier +
                 '}';
+    }
+    public void setTicketId(int ticketId) {
+        this.ticketId = ticketId; // 假设有 ticketId 字段
+    }
+
+    public void setPrizeAmount(double prizeAmount) {
+        this.prizeAmount = prizeAmount; // 假设有 prizeAmount 字段
+    }
+
+    public double getPrizeAmount() {
+        return this.prizeAmount;
     }
 }

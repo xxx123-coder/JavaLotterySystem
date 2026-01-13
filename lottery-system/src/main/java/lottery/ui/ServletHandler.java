@@ -7,7 +7,6 @@ import lottery.model.User;
 import lottery.model.LotteryResult;
 import lottery.model.Ticket;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,22 +35,19 @@ public class ServletHandler extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         handleRequest(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         handleRequest(request, response);
     }
 
     /**
      * 分发HTTP请求到相应的处理方法
      */
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String path = request.getRequestURI();
         String contextPath = request.getContextPath();
         String relativePath = path.substring(contextPath.length());
@@ -59,57 +55,72 @@ public class ServletHandler extends HttpServlet {
         // 设置响应编码
         response.setCharacterEncoding("UTF-8");
 
-        // 路由分发
-        if (relativePath.equals("/") || relativePath.equals("/login")) {
-            handleLogin(request, response);
-        } else if (relativePath.equals("/register")) {
-            handleRegister(request, response);
-        } else if (relativePath.equals("/main")) {
-            handleMain(request, response);
-        } else if (relativePath.equals("/buy-ticket")) {
-            handleBuyTicket(request, response);
-        } else if (relativePath.equals("/draw")) {
-            handleDraw(request, response);
-        } else if (relativePath.equals("/notification")) {
-            handleNotification(request, response);
-        } else if (relativePath.equals("/logout")) {
-            handleLogout(request, response);
-        } else if (relativePath.equals("/my-tickets")) {
-            handleMyTickets(request, response);
-        } else if (relativePath.equals("/recharge")) {
-            handleRecharge(request, response);
-        } else {
-            // 静态资源或404处理
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            sendHtmlResponse(response, "<h1>404 - 页面未找到</h1>");
+        // 使用switch语句替代if链
+        switch (relativePath) {
+            case "/":
+            case "/login":
+                handleLogin(request, response);
+                break;
+            case "/register":
+                handleRegister(request, response);
+                break;
+            case "/main":
+                handleMain(request, response);
+                break;
+            case "/buy-ticket":
+                handleBuyTicket(request, response);
+                break;
+            case "/draw":
+                handleDraw(request, response);
+                break;
+            case "/notification":
+                handleNotification(request, response);
+                break;
+            case "/logout":
+                handleLogout(request, response);
+                break;
+            case "/my-tickets":
+                handleMyTickets(request, response);
+                break;
+            case "/recharge":
+                handleRecharge(request, response);
+                break;
+            default:
+                // 静态资源或404处理
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                sendHtmlResponse(response, "<h1>404 - 页面未找到</h1>");
+                break;
         }
     }
 
     /**
      * 处理登录请求
      */
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 提取if语句中的通用部分
+        String username = null;
+        String password = null;
+
         if ("POST".equalsIgnoreCase(request.getMethod())) {
-            String username = request.getParameter("username");
-            String password = request.getParameter("password");
+            username = request.getParameter("username");
+            password = request.getParameter("password");
+        }
 
-            if (username != null && password != null) {
-                User user = userService.login(username, password);
-                if (user != null) {
-                    // 登录成功，创建会话
-                    HttpSession session = request.getSession(true);
-                    session.setAttribute("user", user);
-                    session.setAttribute("userId", user.getId());
+        if (username != null && password != null) {
+            User user = userService.login(username, password);
+            if (user != null) {
+                // 登录成功，创建会话
+                HttpSession session = request.getSession(true);
+                session.setAttribute("user", user);
+                session.setAttribute("userId", user.getId());
 
-                    // 重定向到主页面
-                    response.sendRedirect("main");
-                    return;
-                } else {
-                    // 登录失败
-                    sendHtmlResponse(response, pageGenerator.generateLoginPage("用户名或密码错误"));
-                    return;
-                }
+                // 重定向到主页面
+                response.sendRedirect("main");
+                return;
+            } else {
+                // 登录失败
+                sendHtmlResponse(response, pageGenerator.generateLoginPage("用户名或密码错误"));
+                return;
             }
         }
 
@@ -120,8 +131,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理注册请求
      */
-    private void handleRegister(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleRegister(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             String username = request.getParameter("username");
             String password = request.getParameter("password");
@@ -153,8 +163,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理主页面请求
      */
-    private void handleMain(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleMain(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -178,8 +187,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理购买彩票请求
      */
-    private void handleBuyTicket(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleBuyTicket(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -214,6 +222,8 @@ public class ServletHandler extends HttpServlet {
                             createMap("success", false, "message", "参数错误"));
                 }
             } catch (Exception e) {
+                // 使用日志而不是printStackTrace
+                System.err.println("购买彩票失败: " + e.getMessage());
                 sendJsonResponse(response,
                         createMap("success", false, "message", "购买失败：" + e.getMessage()));
             }
@@ -227,8 +237,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理抽奖请求
      */
-    private void handleDraw(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleDraw(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录（只有管理员才能抽奖，这里简化处理）
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -236,20 +245,51 @@ public class ServletHandler extends HttpServlet {
             return;
         }
 
+        // 添加日志输出
+        System.out.println("[ServletHandler] 收到抽奖请求，方法: " + request.getMethod());
+
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             try {
+                System.out.println("[ServletHandler] 开始执行抽奖...");
+
                 // 执行抽奖
                 String winningNumbers = lotteryService.drawLottery();
+                System.out.println("[ServletHandler] 抽奖完成，中奖号码: " + winningNumbers);
 
-                // 获取最新结果
-                List<LotteryResult> allResults = lotteryService.getUserWinningResults(0); // 获取所有结果
+                // 获取最新开奖结果
+                List<LotteryResult> allResults = lotteryService.getAllLotteryResults(); // 新增方法
                 LotteryResult latestResult = allResults.isEmpty() ? null : allResults.get(allResults.size() - 1);
 
-                sendJsonResponse(response,
-                        createMap("success", true,
-                                "winningNumbers", winningNumbers,
-                                "result", latestResult != null ? latestResult.getPrizeLevel() : ""));
+                System.out.println("[ServletHandler] 最新开奖结果: " + (latestResult != null ?
+                        "等级=" + latestResult.getPrizeLevel() + ", 号码=" + latestResult.getWinningNumbers() : "无"));
+
+                // 构建详细响应
+                Map<String, Object> responseData = new HashMap<>();
+                responseData.put("success", true);
+                responseData.put("winningNumbers", winningNumbers);
+                responseData.put("message", "抽奖完成！本期中奖号码已生成");
+
+                if (latestResult != null) {
+                    responseData.put("prizeLevel", latestResult.getPrizeLevel());
+                    responseData.put("drawTime", latestResult.getDrawTime());
+
+                    // 获取中奖人数统计
+                    int winnerCount = lotteryService.getWinningTicketCount(winningNumbers);
+                    responseData.put("winnerCount", winnerCount);
+
+                    if (winnerCount > 0) {
+                        responseData.put("winnerInfo", "本期共有 " + winnerCount + " 张彩票中奖");
+                    } else {
+                        responseData.put("winnerInfo", "本期无人中奖");
+                    }
+                }
+
+                System.out.println("[ServletHandler] 发送JSON响应: " + responseData);
+                sendJsonResponse(response, responseData);
+
             } catch (Exception e) {
+                // 使用日志而不是printStackTrace
+                System.err.println("[ServletHandler] 抽奖失败: " + e.getMessage());
                 sendJsonResponse(response,
                         createMap("success", false, "message", "抽奖失败：" + e.getMessage()));
             }
@@ -263,8 +303,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理通知请求
      */
-    private void handleNotification(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleNotification(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -283,8 +322,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理我的彩票请求
      */
-    private void handleMyTickets(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleMyTickets(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -297,42 +335,42 @@ public class ServletHandler extends HttpServlet {
         // 获取用户的彩票
         List<Ticket> tickets = ticketService.getUserTickets(userId);
 
-        // 生成彩票列表页面
-        String html = pageGenerator.generateHeader("我的彩票");
-        html += "<div style='padding: 20px;'>";
-        html += "<h1>我的彩票</h1>";
+        // 生成彩票列表页面，使用StringBuilder优化字符串拼接
+        StringBuilder htmlBuilder = new StringBuilder();
+        htmlBuilder.append(pageGenerator.generateHeader("我的彩票"));
+        htmlBuilder.append("<div style='padding: 20px;'>");
+        htmlBuilder.append("<h1>我的彩票</h1>");
 
         if (tickets.isEmpty()) {
-            html += "<p>您还没有购买彩票。</p>";
+            htmlBuilder.append("<p>您还没有购买彩票。</p>");
         } else {
-            html += "<table border='1' style='width: 100%; border-collapse: collapse;'>";
-            html += "<tr><th>彩票ID</th><th>号码</th><th>注数</th><th>购买时间</th><th>选号方式</th></tr>";
+            htmlBuilder.append("<table border='1' style='width: 100%; border-collapse: collapse;'>");
+            htmlBuilder.append("<tr><th>彩票ID</th><th>号码</th><th>注数</th><th>购买时间</th><th>选号方式</th></tr>");
 
             for (Ticket ticket : tickets) {
-                html += "<tr>";
-                html += "<td>" + ticket.getId() + "</td>";
-                html += "<td>" + ticket.getNumbers() + "</td>";
-                html += "<td>" + ticket.getBetCount() + "</td>";
-                html += "<td>" + ticket.getPurchaseTime() + "</td>";
-                html += "<td>" + (ticket.isManual() ? "手动选号" : "随机选号") + "</td>";
-                html += "</tr>";
+                htmlBuilder.append("<tr>");
+                htmlBuilder.append("<td>").append(ticket.getId()).append("</td>");
+                htmlBuilder.append("<td>").append(ticket.getNumbers()).append("</td>");
+                htmlBuilder.append("<td>").append(ticket.getBetCount()).append("</td>");
+                htmlBuilder.append("<td>").append(ticket.getPurchaseTime()).append("</td>");
+                htmlBuilder.append("<td>").append(ticket.isManual() ? "手动选号" : "随机选号").append("</td>");
+                htmlBuilder.append("</tr>");
             }
 
-            html += "</table>";
+            htmlBuilder.append("</table>");
         }
 
-        html += "<br><a href='main'>返回主页</a>";
-        html += "</div>";
-        html += pageGenerator.generateFooter();
+        htmlBuilder.append("<br><a href='main'>返回主页</a>");
+        htmlBuilder.append("</div>");
+        htmlBuilder.append(pageGenerator.generateFooter());
 
-        sendHtmlResponse(response, html);
+        sendHtmlResponse(response, htmlBuilder.toString());
     }
 
     /**
      * 处理充值请求
      */
-    private void handleRecharge(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleRecharge(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 检查用户是否已登录
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -386,8 +424,7 @@ public class ServletHandler extends HttpServlet {
     /**
      * 处理登出请求
      */
-    private void handleLogout(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
@@ -398,12 +435,11 @@ public class ServletHandler extends HttpServlet {
     /**
      * 发送JSON格式响应
      */
-    private void sendJsonResponse(HttpServletResponse response, Map<String, Object> data)
-            throws IOException {
+    private void sendJsonResponse(HttpServletResponse response, Map<String, Object> data) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
-        // 简单JSON序列化（实际项目应使用JSON库如Jackson或Gson）
+        // 改进的JSON序列化，正确处理不同类型
         StringBuilder json = new StringBuilder("{");
         if (data != null) {
             boolean first = true;
@@ -411,21 +447,47 @@ public class ServletHandler extends HttpServlet {
                 if (!first) {
                     json.append(",");
                 }
-                json.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
+                json.append("\"").append(entry.getKey()).append("\":");
+
+                Object value = entry.getValue();
+                if (value instanceof String) {
+                    json.append("\"").append(escapeJsonString(value.toString())).append("\"");
+                } else if (value instanceof Number) {
+                    json.append(value);
+                } else if (value instanceof Boolean) {
+                    json.append(value);
+                } else if (value == null) {
+                    json.append("null");
+                } else {
+                    // 其他类型转换为字符串，移除不必要的toString()
+                    json.append("\"").append(escapeJsonString(String.valueOf(value))).append("\"");
+                }
                 first = false;
             }
         }
         json.append("}");
 
+        System.out.println("[ServletHandler] 发送JSON: " + json.toString());
         out.print(json.toString());
         out.flush();
     }
 
     /**
+     * 转义JSON字符串中的特殊字符
+     */
+    private String escapeJsonString(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
+
+    /**
      * 发送HTML格式响应
      */
-    private void sendHtmlResponse(HttpServletResponse response, String html)
-            throws IOException {
+    private void sendHtmlResponse(HttpServletResponse response, String html) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         out.print(html);
@@ -433,7 +495,7 @@ public class ServletHandler extends HttpServlet {
     }
 
     /**
-     * 辅助方法：创建Map的简写（重命名以避免冲突）
+     * 辅助方法：创建Map的简写
      */
     private Map<String, Object> createMap(Object... keyValues) {
         Map<String, Object> map = new HashMap<>();

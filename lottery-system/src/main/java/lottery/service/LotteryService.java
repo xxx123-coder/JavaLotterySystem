@@ -29,8 +29,13 @@ public class LotteryService {
      * @return 中奖号码字符串
      */
     public synchronized String drawLottery() {
-        // 生成7个中奖号码（1-36随机）
+        System.out.println("[LotteryService] 开始执行抽奖...");
+
+        // 生成7个不重复的中奖号码（1-36随机）
         int[] winningNumbersArray = NumberUtils.generateRandomNumbers(7, 1, 36);
+
+        // 确保号码排序（可选，便于比较）
+        java.util.Arrays.sort(winningNumbersArray);
 
         // 转换为字符串格式
         StringBuilder winningNumbersBuilder = new StringBuilder();
@@ -42,15 +47,23 @@ public class LotteryService {
         }
         String winningNumbers = winningNumbersBuilder.toString();
 
-        // 遍历所有彩票判断中奖情况
+        System.out.println("[LotteryService] 生成中奖号码: " + winningNumbers);
+
+        // 获取所有未开奖的彩票
         List<Ticket> allTickets = dataManager.getAllTickets();
-        List<Ticket> updatedTickets = new ArrayList<>();
+        System.out.println("[LotteryService] 当前彩票数量: " + allTickets.size());
+
+        List<LotteryResult> newResults = new ArrayList<>();
+        int totalWinningTickets = 0;
 
         for (Ticket ticket : allTickets) {
             // 判断是否中奖
             String prizeLevel = checkWinning(ticket, winningNumbers);
 
             if (!prizeLevel.equals("未中奖")) {
+                System.out.println("[LotteryService] 发现中奖彩票: ID=" + ticket.getId() +
+                        ", 用户ID=" + ticket.getUserId() + ", 等级=" + prizeLevel);
+
                 // 创建中奖结果记录
                 LotteryResult result = new LotteryResult();
                 result.setWinningNumbers(winningNumbers);
@@ -59,17 +72,33 @@ public class LotteryService {
                 result.setPrizeLevel(prizeLevel);
                 result.setMultiplier(1); // 默认倍数
 
+                // 注意：这些方法需要在LotteryResult类中添加
+                // result.setTicketId(ticket.getId()); // 记录关联的彩票ID
+
+                // 计算奖金
+                double prizeAmount = calculatePrizeAmount(prizeLevel) * ticket.getBetCount();
+                // result.setPrizeAmount(prizeAmount); // 需要在LotteryResult类中添加
+
                 // 保存中奖结果
                 dataManager.addResult(result);
+                newResults.add(result);
 
                 // 根据中奖等级给用户发放奖金
-                double prizeAmount = calculatePrizeAmount(prizeLevel);
                 if (prizeAmount > 0) {
                     UserService userService = new UserService(dataManager);
-                    userService.recharge(ticket.getUserId(), prizeAmount);
+                    boolean rechargeSuccess = userService.recharge(ticket.getUserId(), prizeAmount);
+                    System.out.println("[LotteryService] 奖金发放" + (rechargeSuccess ? "成功" : "失败") +
+                            ": 用户ID=" + ticket.getUserId() + ", 金额=" + prizeAmount);
                 }
+
+                totalWinningTickets++;
             }
         }
+
+        // 记录抽奖日志
+        System.out.println("[LotteryService] 抽奖完成: 中奖号码=" + winningNumbers +
+                ", 中奖彩票数=" + totalWinningTickets +
+                ", 新增中奖记录=" + newResults.size());
 
         return winningNumbers;
     }
@@ -89,6 +118,13 @@ public class LotteryService {
         String[] ticketNumberStrs = ticket.getNumbers().split(",");
         String[] winningNumberStrs = winningNumbers.split(",");
 
+        // 验证号码数量
+        if (ticketNumberStrs.length != 7 || winningNumberStrs.length != 7) {
+            System.err.println("[LotteryService] 号码数量错误: 彩票=" + ticketNumberStrs.length +
+                    ", 开奖=" + winningNumberStrs.length);
+            return "未中奖";
+        }
+
         int[] ticketNumbers = new int[ticketNumberStrs.length];
         int[] winningNumbersArray = new int[winningNumberStrs.length];
 
@@ -100,6 +136,7 @@ public class LotteryService {
                 winningNumbersArray[i] = Integer.parseInt(winningNumberStrs[i].trim());
             }
         } catch (NumberFormatException e) {
+            System.err.println("[LotteryService] 号码格式错误: " + e.getMessage());
             return "未中奖";
         }
 
@@ -150,16 +187,6 @@ public class LotteryService {
     }
 
     /**
-     * 检查用户是否有中奖记录
-     * @param userId 用户ID
-     * @return 是否有中奖记录
-     */
-    public boolean hasWinningNotification(int userId) {
-        List<LotteryResult> userResults = getUserWinningResults(userId);
-        return !userResults.isEmpty();
-    }
-
-    /**
      * 获取用户的中奖记录
      * @param userId 用户ID
      * @return 中奖结果列表
@@ -175,5 +202,37 @@ public class LotteryService {
         }
 
         return userResults;
+    }
+
+    /**
+     * 新增：获取所有开奖结果
+     * @return 所有开奖结果列表
+     */
+    public List<LotteryResult> getAllLotteryResults() {
+        return dataManager.getAllResults();
+    }
+
+    /**
+     * 新增：获取指定中奖号码的中奖彩票数量
+     * @param winningNumbers 中奖号码
+     * @return 中奖彩票数量
+     */
+    public int getWinningTicketCount(String winningNumbers) {
+        if (winningNumbers == null || winningNumbers.isEmpty()) {
+            return 0;
+        }
+
+        List<LotteryResult> allResults = dataManager.getAllResults();
+        int count = 0;
+
+        for (LotteryResult result : allResults) {
+            if (result.getWinningNumbers() != null &&
+                    result.getWinningNumbers().equals(winningNumbers) &&
+                    !result.getPrizeLevel().equals("未中奖")) {
+                count++;
+            }
+        }
+
+        return count;
     }
 }
