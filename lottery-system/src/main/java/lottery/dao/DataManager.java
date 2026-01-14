@@ -14,6 +14,7 @@ public class DataManager {
     private List<Map<String, Object>> users = new ArrayList<>();
     private List<Map<String, Object>> tickets = new ArrayList<>();
     private List<Map<String, Object>> results = new ArrayList<>();
+    private List<Map<String, Object>> winnings = new ArrayList<>(); // 新增：中奖记录缓存
 
     private DataManager() {
         excelDao = new ExcelDao();
@@ -37,6 +38,7 @@ public class DataManager {
             users = excelDao.loadUsers();
             tickets = excelDao.loadTickets();
             results = excelDao.loadResults();
+            winnings = excelDao.loadWinnings(); // 新增：加载中奖记录
 
             // 如果没有用户，创建默认用户
             if (users.isEmpty()) {
@@ -49,6 +51,7 @@ public class DataManager {
             System.out.println("  用户数量: " + users.size());
             System.out.println("  彩票数量: " + tickets.size());
             System.out.println("  开奖结果: " + results.size());
+            System.out.println("  中奖记录: " + winnings.size()); // 新增
 
         } catch (Exception e) {
             System.err.println("数据初始化失败: " + e.getMessage());
@@ -56,6 +59,7 @@ public class DataManager {
             users = new ArrayList<>();
             tickets = new ArrayList<>();
             results = new ArrayList<>();
+            winnings = new ArrayList<>(); // 新增
 
             // 创建默认用户
             createDefaultUser();
@@ -93,6 +97,7 @@ public class DataManager {
             excelDao.saveUsers(users);
             excelDao.saveTickets(tickets);
             excelDao.saveResults(results);
+            excelDao.saveWinnings(winnings); // 新增：保存中奖记录
         } catch (Exception e) {
             System.err.println("保存数据失败: " + e.getMessage());
         }
@@ -223,6 +228,93 @@ public class DataManager {
         return new ArrayList<>(results);
     }
 
+    // 新增：中奖记录相关操作
+    public synchronized void addWinning(Map<String, Object> winning) {
+        winnings.add(winning);
+        saveAll();
+    }
+
+    public synchronized List<Map<String, Object>> getAllWinnings() {
+        return new ArrayList<>(winnings);
+    }
+
+    public synchronized List<Map<String, Object>> getWinningsByUserId(int userId) {
+        List<Map<String, Object>> userWinnings = new ArrayList<>();
+        for (Map<String, Object> winning : winnings) {
+            Object userIdObj = winning.get("userId");
+            if (userIdObj != null) {
+                int winningUserId;
+                if (userIdObj instanceof Integer) {
+                    winningUserId = (Integer) userIdObj;
+                } else if (userIdObj instanceof Double) {
+                    winningUserId = ((Double) userIdObj).intValue();
+                } else {
+                    continue;
+                }
+
+                if (winningUserId == userId) {
+                    userWinnings.add(winning);
+                }
+            }
+        }
+        return userWinnings;
+    }
+
+    public synchronized List<Map<String, Object>> getUnreadWinningsByUserId(int userId) {
+        List<Map<String, Object>> unreadWinnings = new ArrayList<>();
+        for (Map<String, Object> winning : winnings) {
+            Object userIdObj = winning.get("userId");
+            Object isNotifiedObj = winning.get("isNotified");
+
+            if (userIdObj != null && isNotifiedObj != null) {
+                int winningUserId;
+                boolean isNotified;
+
+                if (userIdObj instanceof Integer) {
+                    winningUserId = (Integer) userIdObj;
+                } else if (userIdObj instanceof Double) {
+                    winningUserId = ((Double) userIdObj).intValue();
+                } else {
+                    continue;
+                }
+
+                if (isNotifiedObj instanceof Boolean) {
+                    isNotified = (Boolean) isNotifiedObj;
+                } else if (isNotifiedObj instanceof String) {
+                    isNotified = Boolean.parseBoolean((String) isNotifiedObj);
+                } else {
+                    continue;
+                }
+
+                if (winningUserId == userId && !isNotified) {
+                    unreadWinnings.add(winning);
+                }
+            }
+        }
+        return unreadWinnings;
+    }
+
+    public synchronized void markWinningsAsRead(int userId) {
+        for (Map<String, Object> winning : winnings) {
+            Object userIdObj = winning.get("userId");
+            if (userIdObj != null) {
+                int winningUserId;
+                if (userIdObj instanceof Integer) {
+                    winningUserId = (Integer) userIdObj;
+                } else if (userIdObj instanceof Double) {
+                    winningUserId = ((Double) userIdObj).intValue();
+                } else {
+                    continue;
+                }
+
+                if (winningUserId == userId) {
+                    winning.put("isNotified", true);
+                }
+            }
+        }
+        saveAll();
+    }
+
     // 获取统计数据
     public int getUserCount() {
         return users.size();
@@ -234,5 +326,9 @@ public class DataManager {
 
     public int getResultCount() {
         return results.size();
+    }
+
+    public int getWinningCount() { // 新增
+        return winnings.size();
     }
 }

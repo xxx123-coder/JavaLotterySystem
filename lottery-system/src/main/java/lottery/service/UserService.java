@@ -20,6 +20,13 @@ public class UserService {
     public Map<String, Object> login(String username, String password) {
         Map<String, Object> user = dataManager.findUserByUsername(username);
         if (user != null && user.get("password").equals(password)) {
+            // 新增：检查未读中奖通知
+            List<Map<String, Object>> unreadWinnings = dataManager.getUnreadWinningsByUserId(
+                    ((Number) user.get("id")).intValue()
+            );
+            user.put("unreadWinnings", unreadWinnings);
+            user.put("unreadWinningCount", unreadWinnings.size());
+
             return user;
         }
         return null;
@@ -66,7 +73,14 @@ public class UserService {
      * 获取用户信息
      */
     public Map<String, Object> getUserInfo(int userId) {
-        return dataManager.findUserById(userId);
+        Map<String, Object> user = dataManager.findUserById(userId);
+        if (user != null) {
+            // 新增：检查未读中奖通知
+            List<Map<String, Object>> unreadWinnings = dataManager.getUnreadWinningsByUserId(userId);
+            user.put("unreadWinnings", unreadWinnings);
+            user.put("unreadWinningCount", unreadWinnings.size());
+        }
+        return user;
     }
 
     /**
@@ -117,5 +131,24 @@ public class UserService {
         // 使用更新方法
         dataManager.updateUser(user);
         return true;
+    }
+
+    /**
+     * 获取用户中奖记录（新增）
+     */
+    public List<Map<String, Object>> getUserWinnings(int userId) {
+        return dataManager.getWinningsByUserId(userId);
+    }
+
+    /**
+     * 标记用户中奖通知为已读（新增）
+     */
+    public boolean markNotificationsAsRead(int userId) {
+        try {
+            dataManager.markWinningsAsRead(userId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

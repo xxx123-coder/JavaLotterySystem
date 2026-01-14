@@ -68,6 +68,18 @@ public class PageGenerator {
         if (user != null) {
             html += "<p>用户: " + user.get("username") + "</p>";
             html += "<p>余额: ￥" + user.get("balance") + "</p>";
+
+            // 新增：显示未读中奖通知
+            Object unreadCountObj = user.get("unreadWinningCount");
+            if (unreadCountObj != null) {
+                int unreadCount = ((Number) unreadCountObj).intValue();
+                if (unreadCount > 0) {
+                    html += "<div style='background-color: #ffeb3b; padding: 10px; margin: 10px 0; border: 1px solid #ffc107;'>";
+                    html += "<strong>🎉 中奖通知：</strong>您有 " + unreadCount + " 条未读中奖记录！";
+                    html += " <a href='/check-winning'>点击查看</a>";
+                    html += "</div>";
+                }
+            }
         }
 
         html += "<hr>";
@@ -76,6 +88,7 @@ public class PageGenerator {
         html += "<li><a href='/buy-ticket'>购买彩票</a></li>";
         html += "<li><a href='/draw'>开始抽奖</a></li>";
         html += "<li><a href='/my-tickets'>我的彩票</a></li>";
+        html += "<li><a href='/check-winning'>中奖查询</a></li>"; // 新增
         html += "<li><a href='/recharge'>账户充值</a></li>";
         html += "<li><a href='/logout'>退出登录</a></li>";
         html += "</ul>";
@@ -125,6 +138,7 @@ public class PageGenerator {
         html += "<div style='padding: 20px; text-align: center;'>";
         html += "<h1>彩票抽奖</h1>";
         html += "<div id='result' style='font-size: 24px; margin: 20px 0;'></div>";
+        html += "<div id='summary' style='font-size: 16px; margin: 10px 0; color: #666;'></div>";
         html += "<button onclick='draw()' style='padding: 10px 20px; font-size: 18px;'>开始抽奖</button>";
         html += "<br><br><a href='/main'>返回主页</a>";
         html += "</div>";
@@ -136,6 +150,7 @@ public class PageGenerator {
         html += "    .then(response => response.json())";
         html += "    .then(data => {";
         html += "      document.getElementById('result').innerHTML = '中奖号码: ' + data.winningNumbers;";
+        html += "      document.getElementById('summary').innerHTML = data.message;";
         html += "    });";
         html += "}";
         html += "</script>";
@@ -177,6 +192,93 @@ public class PageGenerator {
 
         html += "<br><a href='/main'>返回主页</a>";
         html += "</div>";
+        html += generateFooter();
+        return html;
+    }
+
+    /**
+     * 生成中奖查询页面（新增）
+     */
+    public String generateWinningPage(List<Map<String, Object>> winnings, List<Map<String, Object>> unreadWinnings) {
+        String html = generateHeader("中奖查询");
+        html += "<div style='padding: 20px;'>";
+        html += "<h1>中奖查询</h1>";
+
+        // 显示未读中奖通知
+        if (unreadWinnings != null && !unreadWinnings.isEmpty()) {
+            html += "<div style='background-color: #e8f5e8; padding: 15px; margin: 10px 0; border: 1px solid #4caf50;'>";
+            html += "<h3 style='color: #2e7d32;'>🎉 未读中奖通知</h3>";
+            html += "<table border='1' style='width: 100%;'>";
+            html += "<tr><th>期号</th><th>匹配号码</th><th>中奖等级</th><th>奖金</th><th>中奖时间</th></tr>";
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (Map<String, Object> winning : unreadWinnings) {
+                html += "<tr>";
+                html += "<td>" + winning.get("resultId") + "</td>";
+                html += "<td>" + winning.get("matchCount") + "个</td>";
+                html += "<td>" + winning.get("prizeLevel") + "</td>";
+                html += "<td>￥" + winning.get("prizeAmount") + "</td>";
+
+                Date winTime = (Date) winning.get("winTime");
+                html += "<td>" + (winTime != null ? sdf.format(winTime) : "") + "</td>";
+                html += "</tr>";
+            }
+            html += "</table>";
+            html += "<p><a href='javascript:markAsRead()'>标记为已读</a></p>";
+            html += "</div>";
+        }
+
+        // 显示历史中奖记录
+        html += "<h3>历史中奖记录</h3>";
+        if (winnings == null || winnings.isEmpty()) {
+            html += "<p>暂无历史中奖记录。</p>";
+        } else {
+            html += "<table border='1' style='width: 100%;'>";
+            html += "<tr><th>期号</th><th>匹配号码</th><th>中奖等级</th><th>奖金</th><th>中奖时间</th><th>通知状态</th></tr>";
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (Map<String, Object> winning : winnings) {
+                html += "<tr>";
+                html += "<td>" + winning.get("resultId") + "</td>";
+                html += "<td>" + winning.get("matchCount") + "个</td>";
+                html += "<td>" + winning.get("prizeLevel") + "</td>";
+                html += "<td>￥" + winning.get("prizeAmount") + "</td>";
+
+                Date winTime = (Date) winning.get("winTime");
+                html += "<td>" + (winTime != null ? sdf.format(winTime) : "") + "</td>";
+
+                Object isNotifiedObj = winning.get("isNotified");
+                boolean isNotified = false;
+                if (isNotifiedObj instanceof Boolean) {
+                    isNotified = (Boolean) isNotifiedObj;
+                } else if (isNotifiedObj instanceof String) {
+                    isNotified = Boolean.parseBoolean((String) isNotifiedObj);
+                }
+                html += "<td>" + (isNotified ? "已读" : "<span style='color: red;'>未读</span>") + "</td>";
+                html += "</tr>";
+            }
+            html += "</table>";
+        }
+
+        html += "<br><a href='/main'>返回主页</a>";
+        html += "</div>";
+
+        // JavaScript代码
+        html += "<script>";
+        html += "function markAsRead() {";
+        html += "  fetch('/mark-read', {method: 'POST'})";
+        html += "    .then(response => response.json())";
+        html += "    .then(data => {";
+        html += "      if (data.success) {";
+        html += "        alert('标记成功！');";
+        html += "        location.reload();";
+        html += "      } else {";
+        html += "        alert('标记失败：' + data.message);";
+        html += "      }";
+        html += "    });";
+        html += "}";
+        html += "</script>";
+
         html += generateFooter();
         return html;
     }
@@ -241,6 +343,9 @@ public class PageGenerator {
                 "header { background: #333; color: white; padding: 10px 20px; }" +
                 "a { color: #0066cc; text-decoration: none; }" +
                 "a:hover { text-decoration: underline; }" +
+                "table { border-collapse: collapse; width: 100%; }" +
+                "th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }" +
+                "th { background-color: #f2f2f2; }" +
                 "</style>" +
                 "</head>" +
                 "<body>" +

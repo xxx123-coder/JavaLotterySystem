@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,6 +105,14 @@ public class ServletHandler {
                 break;
             case "/my-tickets":
                 response = handleMyTickets(params);
+                break;
+            case "/check-winning": // 新增：中奖查询
+                response = handleCheckWinning(params);
+                break;
+            case "/mark-read": // 新增：标记为已读
+                if ("POST".equalsIgnoreCase(method)) {
+                    response = handleMarkAsRead(params);
+                }
                 break;
             case "/recharge":
                 if ("POST".equalsIgnoreCase(method)) {
@@ -219,12 +228,8 @@ public class ServletHandler {
      */
     private String handleDraw() {
         try {
-            String winningNumbers = lotteryService.drawLottery();
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("winningNumbers", winningNumbers);
-            result.put("message", "抽奖完成！");
-            return generateJsonResponse(result);
+            Map<String, Object> drawResult = lotteryService.drawLottery();
+            return generateJsonResponse(drawResult);
         } catch (Exception e) {
             Map<String, Object> result = new HashMap<>();
             result.put("success", false);
@@ -242,6 +247,41 @@ public class ServletHandler {
             return pageGenerator.generateMyTicketsPage(ticketService.getUserTickets(userId));
         } catch (Exception e) {
             return generateErrorPage(e.getMessage());
+        }
+    }
+
+    /**
+     * 处理中奖查询（新增）
+     */
+    private String handleCheckWinning(Map<String, String> params) {
+        try {
+            int userId = Integer.parseInt(params.get("userId"));
+            List<Map<String, Object>> allWinnings = userService.getUserWinnings(userId);
+            List<Map<String, Object>> unreadWinnings = lotteryService.getUserWinningNotifications(userId);
+
+            return pageGenerator.generateWinningPage(allWinnings, unreadWinnings);
+        } catch (Exception e) {
+            return generateErrorPage(e.getMessage());
+        }
+    }
+
+    /**
+     * 处理标记为已读（新增）
+     */
+    private String handleMarkAsRead(Map<String, String> params) {
+        try {
+            int userId = Integer.parseInt(params.get("userId"));
+            boolean success = userService.markNotificationsAsRead(userId);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", success);
+            result.put("message", success ? "标记成功" : "标记失败");
+            return generateJsonResponse(result);
+        } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            return generateJsonResponse(result);
         }
     }
 

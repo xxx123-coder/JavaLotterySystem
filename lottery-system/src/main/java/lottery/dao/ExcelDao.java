@@ -18,12 +18,14 @@ public class ExcelDao {
     private String usersFile;
     private String ticketsFile;
     private String resultsFile;
+    private String winningsFile; // 新增：中奖记录文件
 
     public ExcelDao() {
         createDataDirectory();
         usersFile = DATA_DIR + "/users.xlsx";
         ticketsFile = DATA_DIR + "/tickets.xlsx";
         resultsFile = DATA_DIR + "/results.xlsx";
+        winningsFile = DATA_DIR + "/winnings.xlsx"; // 新增
 
         // 初始化Excel文件（如果不存在则创建）
         initializeExcelFiles();
@@ -57,6 +59,11 @@ public class ExcelDao {
 
             createEmptyExcel(resultsFile,
                     Arrays.asList("id", "period", "winningNumbers", "drawTime"));
+
+            // 新增：创建中奖记录文件
+            createEmptyExcel(winningsFile,
+                    Arrays.asList("id", "userId", "ticketId", "resultId", "matchCount",
+                            "prizeLevel", "prizeAmount", "winTime", "isNotified"));
 
             System.out.println("Excel文件初始化完成");
 
@@ -131,6 +138,21 @@ public class ExcelDao {
      */
     public List<Map<String, Object>> loadResults() throws IOException {
         return loadFromExcel(resultsFile);
+    }
+
+    /**
+     * 保存中奖记录（新增）
+     */
+    public void saveWinnings(List<Map<String, Object>> winnings) throws IOException {
+        saveToExcel(winningsFile, winnings, Arrays.asList("id", "userId", "ticketId", "resultId",
+                "matchCount", "prizeLevel", "prizeAmount", "winTime", "isNotified"));
+    }
+
+    /**
+     * 读取中奖记录（新增）
+     */
+    public List<Map<String, Object>> loadWinnings() throws IOException {
+        return loadFromExcel(winningsFile);
     }
 
     /**
