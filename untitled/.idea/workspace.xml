@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="19ea2b89-50ff-4d2a-8039-c9b4f2d0c9ff" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/config/AppConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/config/ConfigManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/config/ExcelConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/config/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/constants/ExcelConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/constants/FileConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/constants/SystemConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/constants/TimeConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/constants/WebConstants.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/handler/AttendanceExcelHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/handler/ClassExcelHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/handler/StudentExcelHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/manager/ExcelFileManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/manager/TemplateManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/reader/ExcelReader.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/reader/StudentExcelReader.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/writer/AttendanceExcelWriter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/excel/writer/ExcelWriter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/exception/BusinessException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/exception/ExcelException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/exception/FileException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/exception/WebException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/action/ButtonActionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/action/MenuActionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/AttendanceRecord.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/AttendanceTable.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/ClassComboBox.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/StatusIndicator.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/Student.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/component/StudentTable.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/frame/AboutDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/frame/LoginFrame.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/frame/MainFrame.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/AttendanceControlPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/ClassManagementPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/DashboardPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/QrCodeDisplayPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/SettingsPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/StatisticsPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/gui/panel/StudentManagementPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/main/ApplicationLauncher.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/main/AttendanceApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/main/DataInitializer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/main/SystemTrayManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/dto/QrCodeDTO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/dto/SignInRequestDTO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/dto/SignInResponseDTO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/entity/AttendanceClass.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/entity/AttendanceRecord.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/entity/QrCodeSession.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/entity/Student.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/enums/Gender.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/enums/SignStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/model/enums/TimeSyncStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/service/AttendanceService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/service/ClassService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/service/QrCodeService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/service/StatisticsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/service/StudentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/DateUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/ExcelUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/FileUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/LoggerUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/QrCodeUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/StringUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/TimeUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/util/ValidationUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/filter/AuthenticationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/filter/LoggingFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/server/EmbeddedServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/server/ServerConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/servlet/AttendanceServlet.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/servlet/QrCodeServlet.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/java/com/qrcode/attendance/web/servlet/SignInPageServlet.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/config/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/config/logback.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/i18n/messages_zh_CN.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/css/qrcode.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/css/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/images/icon/error.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/images/icon/success.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/images/icon/warning.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/static/images/logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/templates/html/error.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/templates/html/signin.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/main/resources/templates/html/success.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/excel/AttendanceExcelHandlerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/excel/ClassExcelHandlerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/service/AttendanceServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/service/ClassServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/service/StudentServiceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/util/DateUtilTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/util/StringUtilTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/util/ValidationUtilTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../QRCodeAttendanceSystem/src/test/java/com/qrcode/attendance/web/AttendanceServletTest.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "xxx123-coder"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/xxx123-coder/QRCodeAttendanceSystem.git",
+    "accountId": "775609f0-e790-423a-bc28-dd6005885651"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="38C3OQrDrC0ItPiyTpcHULTmTHp" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="GroovyScriptRunConfiguration" factoryName="Groovy">
+      <setting name="path" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workDir" value="file://$PROJECT_DIR$" />
+      <setting name="debug" value="false" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="19ea2b89-50ff-4d2a-8039-c9b4f2d0c9ff" name="更改" comment="" />
+      <created>1768289693853</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768289693853</updated>
+      <workItem from="1768289695145" duration="123000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

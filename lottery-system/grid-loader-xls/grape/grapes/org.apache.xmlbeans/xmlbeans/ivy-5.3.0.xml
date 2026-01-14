@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="org.apache.xmlbeans"
+		module="xmlbeans"
+		revision="5.3.0"
+		status="release"
+		publication="20241204084408"
+	>
+		<license name="The Apache Software License, Version 2.0" url="https://www.apache.org/licenses/LICENSE-2.0.txt" />
+		<description homepage="https://xmlbeans.apache.org/">
+		XmlBeans main jar
+		</description>
+		<m:dependency.management__org.apache.maven.plugin-tools__maven-plugin-annotations__version>3.13.1</m:dependency.management__org.apache.maven.plugin-tools__maven-plugin-annotations__version>
+		<m:dependency.management__org.apache.logging__logging-parent__version>11.0.0</m:dependency.management__org.apache.logging__logging-parent__version>
+		<m:dependency.management__biz.aQute.bnd__biz.aQute.bnd.annotation__version>7.0.0</m:dependency.management__biz.aQute.bnd__biz.aQute.bnd.annotation__version>
+		<m:dependency.management__com.github.spotbugs__spotbugs-annotations__version>4.8.6</m:dependency.management__com.github.spotbugs__spotbugs-annotations__version>
+		<m:dependency.management__org.jspecify__jspecify__version>1.0.0</m:dependency.management__org.jspecify__jspecify__version>
+		<m:dependency.management__org.osgi__osgi.annotation__version>8.1.0</m:dependency.management__org.osgi__osgi.annotation__version>
+		<m:dependency.management__org.osgi__org.osgi.annotation.bundle__version>2.0.0</m:dependency.management__org.osgi__org.osgi.annotation.bundle__version>
+		<m:dependency.management__org.osgi__org.osgi.annotation.versioning__version>1.1.2</m:dependency.management__org.osgi__org.osgi.annotation.versioning__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-1.2-api__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-1.2-api__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-api__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-api__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-api-test__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-api-test__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-appserver__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-appserver__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-cassandra__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-cassandra__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-core__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-core__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-core-test__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-core-test__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-couchdb__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-couchdb__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-docker__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-docker__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-flume-ng__version>2.23.1</m:dependency.management__org.apache.logging.log4j__log4j-flume-ng__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-iostreams__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-iostreams__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jakarta-smtp__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jakarta-smtp__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jakarta-web__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jakarta-web__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jcl__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jcl__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jpa__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jpa__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jpl__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jpl__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-jul__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-jul__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-layout-template-json__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-layout-template-json__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-mongodb4__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-mongodb4__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-mongodb__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-mongodb__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-slf4j2-impl__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-slf4j2-impl__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-slf4j-impl__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-slf4j-impl__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-spring-boot__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-spring-boot__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-spring-cloud-config-client__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-spring-cloud-config-client__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-taglib__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-taglib__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-to-jul__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-to-jul__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-to-slf4j__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-to-slf4j__version>
+		<m:dependency.management__org.apache.logging.log4j__log4j-web__version>2.24.2</m:dependency.management__org.apache.logging.log4j__log4j-web__version>
+	</info>
+	<configurations>
+		<conf name="default" visibility="public" description="runtime dependencies and master artifact can be used with this conf" extends="runtime,master"/>
+		<conf name="master" visibility="public" description="contains only the artifact published by this module itself, with no transitive dependencies"/>
+		<conf name="compile" visibility="public" description="this is the default scope, used if none is specified. Compile dependencies are available in all classpaths."/>
+		<conf name="provided" visibility="public" description="this is much like compile, but indicates you expect the JDK or a container to provide it. It is only available on the compilation classpath, and is not transitive."/>
+		<conf name="runtime" visibility="public" description="this scope indicates that the dependency is not required for compilation, but is for execution. It is in the runtime and test classpaths, but not the compile classpath." extends="compile"/>
+		<conf name="test" visibility="public" description="this scope indicates that the dependency is not required for normal use of the application, and is only available for the test compilation and execution phases." extends="runtime"/>
+		<conf name="system" visibility="public" description="this scope is similar to provided except that you have to provide the JAR which contains it explicitly. The artifact is always available and is not looked up in a repository."/>
+		<conf name="sources" visibility="public" description="this configuration contains the source artifact of this module, if any."/>
+		<conf name="javadoc" visibility="public" description="this configuration contains the javadoc artifact of this module, if any."/>
+		<conf name="optional" visibility="public" description="contains all optional dependencies"/>
+	</configurations>
+	<publications>
+		<artifact name="xmlbeans" type="jar" ext="jar" conf="master"/>
+		<artifact name="xmlbeans" type="source" ext="jar" conf="sources" m:classifier="sources"/>
+		<artifact name="xmlbeans" type="javadoc" ext="jar" conf="javadoc" m:classifier="javadoc"/>
+	</publications>
+	<dependencies>
+		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.24.2" force="true" conf="compile->compile(*),master(*);runtime->runtime(*)"/>
+		<dependency org="net.sf.saxon" name="Saxon-HE" rev="12.5" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="com.github.javaparser" name="javaparser-core" rev="3.26.2" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="com.github.javaparser" name="javaparser-symbol-solver-core" rev="3.26.2" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="org.apache.maven" name="maven-plugin-api" rev="3.9.9" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="org.apache.maven" name="maven-model" rev="3.9.9" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<dependency org="org.apache.maven.plugin-tools" name="maven-plugin-annotations" rev="3.15.1" force="true" conf="provided->compile(*),provided(*),runtime(*),master(*)"/>
+		<override org="org.apache.maven.plugin-tools" module="maven-plugin-annotations" matcher="exact" rev="3.13.1"/>
+		<override org="org.apache.logging" module="logging-parent" matcher="exact" rev="11.0.0"/>
+		<override org="biz.aQute.bnd" module="biz.aQute.bnd.annotation" matcher="exact" rev="7.0.0"/>
+		<override org="com.github.spotbugs" module="spotbugs-annotations" matcher="exact" rev="4.8.6"/>
+		<override org="org.jspecify" module="jspecify" matcher="exact" rev="1.0.0"/>
+		<override org="org.osgi" module="osgi.annotation" matcher="exact" rev="8.1.0"/>
+		<override org="org.osgi" module="org.osgi.annotation.bundle" matcher="exact" rev="2.0.0"/>
+		<override org="org.osgi" module="org.osgi.annotation.versioning" matcher="exact" rev="1.1.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-1.2-api" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-api" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-api-test" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-appserver" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-cassandra" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-core" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-core-test" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-couchdb" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-docker" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-flume-ng" matcher="exact" rev="2.23.1"/>
+		<override org="org.apache.logging.log4j" module="log4j-iostreams" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jakarta-smtp" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jakarta-web" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jcl" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jpa" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jpl" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-jul" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-layout-template-json" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-mongodb4" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-mongodb" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-slf4j2-impl" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-slf4j-impl" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-spring-boot" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-spring-cloud-config-client" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-taglib" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-to-jul" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-to-slf4j" matcher="exact" rev="2.24.2"/>
+		<override org="org.apache.logging.log4j" module="log4j-web" matcher="exact" rev="2.24.2"/>
+	</dependencies>
+</ivy-module>

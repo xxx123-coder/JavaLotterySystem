@@ -1,0 +1,230 @@
+config/ - 系统配置管理（4个类）
+
+model/ - 数据实体模型（7个类）
+
+dao/ - Excel数据访问层（7个类）
+
+util/ - 工具类包（10个类）
+
+exception/ - 异常处理（4个类）
+
+1. config包开发提示词（Windows专用）
+text
+开发彩票系统的配置管理模块，专门针对Windows系统优化：
+
+1. SystemConfig.java（单例模式）：
+   - 从data/config.properties加载配置，如果不存在则创建默认配置
+   - 默认配置包含：
+     * 彩票价格=2.0
+     * 最大投注倍数=100
+     * 中奖奖金：特等奖5000000，一等奖200000
+     * 数据路径=./data/
+     * Windows字体=微软雅黑
+   - 提供reload()方法重新加载配置
+   - 提供save()方法保存配置修改
+   - 使用synchronized确保线程安全
+
+2. Constants.java（常量类）：
+   - 彩票规则常量：MIN_NUMBER=1, MAX_NUMBER=36, SELECT_COUNT=7
+   - 中奖等级常量：SPECIAL_LEVEL=7, FIRST_LEVEL=6
+   - 文件路径常量：使用Windows路径分隔符（\）
+   - 用户状态常量：NORMAL=0, DISABLED=1
+   - Excel列索引常量：USER_ID_COL=0, USER_NAME_COL=1等
+
+3. ExcelConfig.java：
+   - 定义Excel文件格式：使用.xlsx格式
+   - 各Excel文件的列定义：
+     * users.xlsx：id,username,password,balance,phone,create_time,update_time,status
+     * tickets.xlsx：id,user_id,numbers,bet_count,create_time,draw_id
+   - 设置Excel样式：表头背景色、字体、对齐方式
+   - 定义数据验证规则：电话号码格式、金额格式
+
+4. LotteryConfig.java：
+   - 开奖配置：开奖时间、开奖间隔
+   - 奖金配置：各等级奖金金额
+   - 购彩限制：单注最大倍数、单日最大投注额
+   - Windows专用配置：使用系统托盘、任务栏进度等
+
+要求：所有配置类必须支持Windows中文环境（GBK/UTF-8兼容），路径处理使用Windows风格。
+2. model包开发提示词
+text
+开发彩票系统的数据模型，使用面向对象设计：
+
+1. BaseModel.java（抽象基类）：
+   - 属性：id(String), createTime(Date), updateTime(Date)
+   - 方法：getId(), setId(), getCreateTime(), setUpdateTime()
+   - 实现Comparable接口，按创建时间排序
+   - 使用UUID生成唯一ID
+
+2. User.java（用户实体）：
+   - 扩展BaseModel
+   - 属性：username, password, balance(double), phone, status(int)
+   - 方法：recharge(amount), deduct(amount), checkBalance()
+   - 密码加密：使用MD5加密存储
+   - 验证：用户名长度3-20，密码长度6-20，手机号格式验证
+
+3. LotteryTicket.java（彩票实体）：
+   - 扩展BaseModel
+   - 属性：userId, numbers(List<Integer>), betCount(int), drawId
+   - 方法：getFormattedNumbers(), calculatePrize(drawNumbers)
+   - 验证：numbers必须是7个1-36的不重复数字
+   - 设计：重写toString()格式化为可读字符串
+
+4. LotteryDraw.java（开奖实体）：
+   - 扩展BaseModel
+   - 属性：drawNumbers(List<Integer>), drawTime(Date), status(String)
+   - 方法：generateDrawNumbers()随机生成7个不重复号码
+   - 设计：提供toResultString()方法格式化开奖结果
+
+5. AwardRecord.java（中奖记录）：
+   - 扩展BaseModel
+   - 属性：userId, ticketId, drawId, awardLevel(int), amount(double), claimed(boolean)
+   - 方法：calculateAmount()根据中奖等级计算奖金
+   - 设计：使用枚举定义中奖等级
+
+6. PageResult.java（分页结果）：
+   - 泛型类：PageResult<T>
+   - 属性：data(List<T>), total(int), page(int), pageSize(int)
+   - 方法：getTotalPages(), hasNext(), hasPrevious()
+
+7. Statistics.java（统计数据）：
+   - 属性：totalUsers, totalTickets, totalSales, totalAwards
+   - 方法：calculateDailyStats(), generateReport()
+   - 设计：使用BigDecimal进行精确金额计算
+
+要求：所有实体类实现Serializable接口，支持序列化；使用Lombok注解减少样板代码（可选）。
+3. dao包开发提示词（Excel实现）
+text
+开发基于Apache POI的Excel数据访问层，支持Windows大文件操作：
+
+1. BaseExcelDao.java（抽象基类）：
+   - 泛型<T extends BaseModel>
+   - 属性：filePath, sheetName, columnDefinitions
+   - 方法：save(T), update(T), delete(String id), findById(String id), findAll()
+   - 实现：使用SXSSFWorkbook处理大文件（10万级数据）
+   - 缓存：使用LinkedHashMap实现LRU缓存
+
+2. ExcelDao.java（接口）：
+   - 定义CRUD操作接口
+   - 批量操作方法：saveAll(List<T>), updateAll(List<T>)
+   - 查询方法：findByCondition(Map<String, Object>), count()
+   - 分页方法：findByPage(int page, int pageSize)
+
+3. UserExcelDao.java：
+   - 继承BaseExcelDao<User>
+   - 实现：按用户名查询findByUsername(String)
+   - 实现：按手机号查询findByPhone(String)
+   - 实现：批量导入10万用户数据importBatch(List<User>)
+   - 优化：使用多线程加速批量插入
+
+4. TicketExcelDao.java：
+   - 继承BaseExcelDao<LotteryTicket>
+   - 实现：按用户ID查询findByUserId(String)
+   - 实现：按期号查询findByDrawId(String)
+   - 实现：统计用户购彩记录countByUserId(String)
+
+5. DrawExcelDao.java：
+   - 继承BaseExcelDao<LotteryDraw>
+   - 实现：获取最新开奖getLatestDraw()
+   - 实现：按时间范围查询findByDateRange(Date start, Date end)
+
+6. AwardExcelDao.java：
+   - 继承BaseExcelDao<AwardRecord>
+   - 实现：按用户查询中奖记录findByUserId(String)
+   - 实现：更新领取状态updateClaimed(String awardId, boolean claimed)
+
+7. ExcelFileManager.java：
+   - 文件管理：初始化Excel文件、备份、恢复
+   - 数据验证：检查数据完整性
+   - 性能监控：记录文件操作耗时
+   - 自动备份：每日自动备份数据文件
+
+要求：处理10万用户数据时，内存使用不超过512MB；支持断电恢复；使用Windows文件锁防止并发写入冲突。
+4. util包开发提示词
+text
+开发彩票系统的工具类，针对Windows环境优化：
+
+1. ExcelUtil.java：
+   - 使用Apache POI操作Excel
+   - 方法：readExcel(filePath, sheetIndex), writeExcel(data, filePath)
+   - 优化：使用SXSSFWorkbook处理大数据，设置窗口大小为1000行
+   - Windows专用：处理Windows路径、文件编码
+
+2. LotteryUtil.java：
+   - 生成随机号码：generateRandomNumbers(count, min, max)
+   - 计算中奖等级：calculatePrizeLevel(userNumbers, drawNumbers)
+   - 格式化号码：formatNumbers(List<Integer>) 输出为"01,02,03..."
+   - 验证号码：validateNumbers(numbers) 检查范围和不重复
+
+3. PasswordUtil.java：
+   - MD5加密：md5(password)
+   - 密码验证：validatePassword(password) 长度6-20，包含字母数字
+   - 生成随机密码：generateRandomPassword(length)
+
+4. NumberValidator.java：
+   - 验证号码范围：inRange(number, min, max)
+   - 检查重复：hasDuplicates(List<Integer>)
+   - 验证数量：correctCount(List<Integer>, expectedCount)
+
+5. MoneyUtil.java：
+   - 金额计算：add, subtract, multiply, divide（使用BigDecimal）
+   - 格式化：format(money) 输出为"￥1,000.00"
+   - 中奖计算：calculatePrizeAmount(level, betCount)
+
+6. DateUtil.java：
+   - 日期格式化：format(date, pattern)
+   - 日期计算：addDays, addHours
+   - Windows时间格式：支持yyyy-MM-dd HH:mm:ss
+
+7. StringUtil.java：
+   - 判空：isEmpty, isNotEmpty
+   - 隐藏敏感信息：maskPhone("13800138000") -> "138****8000"
+   - 格式化：padLeft(number, length, padChar) 用于号码补零
+
+8. FileUtil.java（Windows专用）：
+   - Windows路径处理：convertToWindowsPath(path)
+   - 文件操作：createDirectory, deleteFile, copyFile
+   - 资源文件处理：copyTemplateFromResources(templateName, targetPath)
+   - 自动创建数据目录和模板文件
+
+9. IdGenerator.java：
+   - 生成用户ID：U + 时间戳 + 随机数
+   - 生成彩票ID：T + 年月日 + 序号
+   - 生成开奖期号：yyyyMMdd + 三位序号
+   - 使用synchronized确保线程安全
+
+10. SerializationUtil.java：
+    - 对象序列化：serialize(obj, filePath)
+    - 对象反序列化：deserialize(filePath)
+    - 深拷贝：deepCopy(obj)
+
+要求：所有工具类使用静态方法，私有构造器防止实例化；考虑Windows文件系统特性。
+5. exception包开发提示词
+text
+开发彩票系统的异常体系：
+
+1. BusinessException.java（业务异常基类）：
+   - 继承RuntimeException
+   - 属性：errorCode(String), errorMessage(String), timestamp(Date)
+   - 构造器：支持错误码、错误信息、原因异常
+   - 方法：getErrorCode(), getErrorMessage(), getTimestamp()
+
+2. ExcelException.java（Excel操作异常）：
+   - 继承BusinessException
+   - 错误码：EXCEL_READ_ERROR, EXCEL_WRITE_ERROR, FILE_NOT_FOUND
+   - 包含文件路径信息：filePath
+   - 包含Excel操作详情：sheetName, rowNumber
+
+3. ServiceException.java（服务异常）：
+   - 继承BusinessException
+   - 错误码：USER_NOT_FOUND, BALANCE_INSUFFICIENT, TICKET_INVALID
+   - 包含业务操作类型：operationType
+   - 包含相关ID：userId, ticketId等
+
+4. ValidationException.java（验证异常）：
+   - 继承BusinessException
+   - 错误码：VALIDATION_ERROR, FORMAT_ERROR, RANGE_ERROR
+   - 包含验证字段：fieldName
+   - 包含验证规则：validationRule
+
+要求：所有异常提供详细的错误信息和错误码，便于日志记录和问题定位；支持异常链。

@@ -1,0 +1,108 @@
+包模块详细分工：
+1. 主程序入口包 (4个类)
+ApplicationLauncher.java
+
+AttendanceApplication.java
+
+SystemTrayManager.java
+
+DataInitializer.java
+
+2. 配置管理包 (4个类)
+AppConfig.java
+
+ExcelConfig.java
+
+WebConfig.java
+
+ConfigManager.java
+
+3. 图形用户界面框架 (3个类)
+MainFrame.java
+
+LoginFrame.java
+
+AboutDialog.java
+
+4. 图形用户界面动作包 (2个类)
+MenuActionHandler.java
+
+ButtonActionHandler.java
+
+5. 图形用户界面面板包 (7个类)
+DashboardPanel.java
+
+ClassManagementPanel.java
+
+StudentManagementPanel.java
+
+AttendanceControlPanel.java
+
+QrCodeDisplayPanel.java
+
+StatisticsPanel.java
+
+SettingsPanel.java
+
+6. 图形用户界面组件包 (4个类)
+AttendanceTable.java
+
+StudentTable.java
+
+ClassComboBox.java
+
+StatusIndicator.java
+
+7. 数据模型实体包 (4个类)
+StudentEntity.java
+
+ClassEntity.java
+
+AttendanceRecordEntity.java
+
+TeacherEntity.java
+
+8. 数据模型枚举包 (4个类)
+SignStatus.java
+
+Gender.java
+
+AttendanceType.java
+
+TimeSyncStatus.java
+
+9. 常量定义包 (7个类)
+SystemConstants.java
+
+FileConstants.java
+
+ExcelConstants.java
+
+WebConstants.java
+
+ErrorConstants.java
+
+MessageConstants.java
+
+RegexConstants.java
+
+10. 异常处理包 (8个类)
+BusinessException.java
+
+FileException.java
+
+ExcelException.java
+
+WebException.java
+
+ValidationException.java
+
+QrCodeException.java
+
+GlobalExceptionHandler.java
+
+ExceptionUtil.java
+资源文件责任：
+src/main/resources/static/ - 所有静态资源
+
+src/main/resources/i18n/ - 国际化资源
