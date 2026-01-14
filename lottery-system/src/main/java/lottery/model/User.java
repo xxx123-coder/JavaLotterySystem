@@ -6,6 +6,7 @@ package lottery.model;
  */
 public class User {
     private int id;             // 用户ID
+    private String name;        // 用户名 - 添加此字段
     private String username;    // 用户名
     private String password;    // 密码
     private double balance;     // 账户余额
@@ -19,15 +20,11 @@ public class User {
 
     /**
      * 全参构造函数
-     * @param id 用户ID
-     * @param username 用户名
-     * @param password 密码
-     * @param balance 账户余额
-     * @param phone 电话号码
      */
     public User(int id, String username, String password, double balance, String phone) {
         this.id = id;
         this.username = username;
+        this.name = username; // 保持name和username一致
         this.password = password;
         this.balance = balance;
         this.phone = phone;
@@ -42,12 +39,23 @@ public class User {
         this.id = id;
     }
 
+    // 为了兼容ExcelDao，添加name的getter/setter
+    public String getName() {
+        return name != null ? name : username;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        this.username = name; // 保持一致性
+    }
+
     public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
+        this.name = username; // 保持一致性
     }
 
     public String getPassword() {

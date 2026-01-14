@@ -1,167 +1,196 @@
 package lottery.service;
 
 import lottery.dao.DataManager;
-import lottery.model.Ticket;
-import lottery.model.User;
-import lottery.util.NumberUtils;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
- * 彩票服务类，处理彩票购买业务逻辑
+ * 彩票服务类
  */
 public class TicketService {
     private final DataManager dataManager;
-    private static final double PRICE_PER_BET = 2.0; // 每注价格
-
-    public TicketService() {
-        // DataManager是单例模式，使用getInstance()
-        this.dataManager = DataManager.getInstance();
-    }
+    private static final double PRICE_PER_BET = 2.0;
+    private static final int NUMBERS_COUNT = 7;
+    private static final int MIN_NUMBER = 1;
+    private static final int MAX_NUMBER = 36;
 
     public TicketService(DataManager dataManager) {
+        if (dataManager == null) {
+            throw new IllegalArgumentException("DataManager不能为null");
+        }
         this.dataManager = dataManager;
+        System.out.println("TicketService初始化完成");
     }
 
     /**
      * 手动选号购买彩票
-     * @param userId 用户ID
-     * @param numbers 号码字符串，格式如"1,2,3,4,5,6,7"
-     * @param betCount 注数
-     * @return 购买的彩票对象
      */
-    public synchronized Ticket buyManualTicket(int userId, String numbers, int betCount) {
-        // 参数验证
+    public Map<String, Object> buyManualTicket(int userId, String numbers, int betCount) {
+        // 验证参数
         if (betCount <= 0) {
             throw new IllegalArgumentException("注数必须大于0");
         }
 
-        // 验证号码格式
-        String[] numberArray = numbers.split(",");
-        if (numberArray.length != 7) {
-            throw new IllegalArgumentException("必须选择7个号码");
+        if (numbers == null || numbers.trim().isEmpty()) {
+            throw new IllegalArgumentException("号码不能为空");
         }
 
-        // 验证号码是否合法（1-36，不重复）
-        int[] selectedNumbers = new int[7];
-        for (int i = 0; i < 7; i++) {
+        // 验证号码格式
+        String[] numberArray = numbers.split(",");
+        if (numberArray.length != NUMBERS_COUNT) {
+            throw new IllegalArgumentException("必须选择" + NUMBERS_COUNT + "个号码");
+        }
+
+        // 验证号码范围
+        Set<Integer> selectedNumbers = new TreeSet<>();
+        for (String numStr : numberArray) {
             try {
-                int num = Integer.parseInt(numberArray[i].trim());
-                if (num < 1 || num > 36) {
-                    throw new IllegalArgumentException("号码必须在1-36之间");
+                int num = Integer.parseInt(numStr.trim());
+                if (num < MIN_NUMBER || num > MAX_NUMBER) {
+                    throw new IllegalArgumentException("号码必须在" + MIN_NUMBER + "-" + MAX_NUMBER + "之间");
                 }
-                selectedNumbers[i] = num;
+                selectedNumbers.add(num);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("号码格式不正确");
+                throw new IllegalArgumentException("号码格式不正确: " + numStr);
             }
         }
 
-        // 检查是否有重复号码
-        if (!NumberUtils.isUniqueNumbers(selectedNumbers)) {
+        if (selectedNumbers.size() != NUMBERS_COUNT) {
             throw new IllegalArgumentException("号码不能重复");
         }
+
+        // 排序号码
+        StringBuilder sortedNumbers = new StringBuilder();
+        for (int num : selectedNumbers) {
+            sortedNumbers.append(num).append(",");
+        }
+        String sortedNumbersStr = sortedNumbers.substring(0, sortedNumbers.length() - 1);
 
         // 计算总金额
         double totalCost = calculateTotalCost(betCount);
 
-        // 检查用户余额是否足够
-        User user = dataManager.getUserById(userId);
+        // 检查用户余额
+        Map<String, Object> user = dataManager.findUserById(userId);
         if (user == null) {
             throw new IllegalArgumentException("用户不存在");
         }
-        if (user.getBalance() < totalCost) {
+
+        double balance = ((Number) user.get("balance")).doubleValue();
+        if (balance < totalCost) {
             throw new IllegalArgumentException("余额不足");
         }
 
         // 扣款
-        UserService userService = new UserService(dataManager);
-        if (!userService.deduct(userId, totalCost)) {
-            throw new RuntimeException("扣款失败");
-        }
+        user.put("balance", balance - totalCost);
 
-        // 创建彩票
-        Ticket ticket = new Ticket();
-        ticket.setUserId(userId);
-        ticket.setNumbers(numbers);
-        ticket.setBetCount(betCount);
-        ticket.setPurchaseTime(new Date());
-        ticket.setManual(true); // 手动选号
+        // 创建彩票数据
+        Map<String, Object> ticket = new HashMap<>();
+        ticket.put("id", generateTicketId());
+        ticket.put("userId", userId);
+        ticket.put("numbers", sortedNumbersStr);
+        ticket.put("betCount", betCount);
+        ticket.put("purchaseTime", new Date());
+        ticket.put("manual", true);
 
         // 保存彩票
         dataManager.addTicket(ticket);
+
+        // 更新用户余额
+        dataManager.saveAll();
+
         return ticket;
     }
 
     /**
      * 随机选号购买彩票
-     * @param userId 用户ID
-     * @param betCount 注数
-     * @return 购买的彩票对象
      */
-    public synchronized Ticket buyRandomTicket(int userId, int betCount) {
-        // 生成7个随机不重复数字（1-36）
-        int[] randomNumbers = NumberUtils.generateRandomNumbers(7, 1, 36);
-
-        // 转换为字符串格式
-        StringBuilder numbersBuilder = new StringBuilder();
-        for (int i = 0; i < randomNumbers.length; i++) {
-            numbersBuilder.append(randomNumbers[i]);
-            if (i < randomNumbers.length - 1) {
-                numbersBuilder.append(",");
-            }
+    public Map<String, Object> buyRandomTicket(int userId, int betCount) {
+        if (betCount <= 0) {
+            throw new IllegalArgumentException("注数必须大于0");
         }
 
-        // 调用手动购买方法，但设置为非手动
-        Ticket ticket = new Ticket();
-        ticket.setUserId(userId);
-        ticket.setNumbers(numbersBuilder.toString());
-        ticket.setBetCount(betCount);
-        ticket.setPurchaseTime(new Date());
-        ticket.setManual(false); // 随机选号
+        // 生成随机号码
+        Random random = new Random();
+        Set<Integer> numbers = new TreeSet<>();
+        while (numbers.size() < NUMBERS_COUNT) {
+            numbers.add(random.nextInt(MAX_NUMBER) + 1);
+        }
+
+        // 格式化号码
+        StringBuilder numbersBuilder = new StringBuilder();
+        for (int num : numbers) {
+            numbersBuilder.append(num).append(",");
+        }
+        String numbersStr = numbersBuilder.substring(0, numbersBuilder.length() - 1);
 
         // 计算总金额
         double totalCost = calculateTotalCost(betCount);
 
-        // 检查用户余额是否足够
-        User user = dataManager.getUserById(userId);
+        // 检查用户余额
+        Map<String, Object> user = dataManager.findUserById(userId);
         if (user == null) {
             throw new IllegalArgumentException("用户不存在");
         }
-        if (user.getBalance() < totalCost) {
+
+        double balance = ((Number) user.get("balance")).doubleValue();
+        if (balance < totalCost) {
             throw new IllegalArgumentException("余额不足");
         }
 
         // 扣款
-        UserService userService = new UserService(dataManager);
-        if (!userService.deduct(userId, totalCost)) {
-            throw new RuntimeException("扣款失败");
-        }
+        user.put("balance", balance - totalCost);
+
+        // 创建彩票数据
+        Map<String, Object> ticket = new HashMap<>();
+        ticket.put("id", generateTicketId());
+        ticket.put("userId", userId);
+        ticket.put("numbers", numbersStr);
+        ticket.put("betCount", betCount);
+        ticket.put("purchaseTime", new Date());
+        ticket.put("manual", false);
 
         // 保存彩票
         dataManager.addTicket(ticket);
+
+        // 更新用户余额
+        dataManager.saveAll();
+
         return ticket;
     }
 
     /**
-     * 获取用户的所有彩票
-     * @param userId 用户ID
-     * @return 彩票列表
+     * 获取用户的彩票
      */
-    public List<Ticket> getUserTickets(int userId) {
+    public List<Map<String, Object>> getUserTickets(int userId) {
+        if (userId <= 0) {
+            throw new IllegalArgumentException("用户ID无效");
+        }
         return dataManager.getTicketsByUserId(userId);
     }
 
     /**
+     * 获取所有彩票
+     */
+    public List<Map<String, Object>> getAllTickets() {
+        return dataManager.getAllTickets();
+    }
+
+    /**
      * 计算总价格
-     * @param betCount 注数
-     * @return 总价格
      */
     public double calculateTotalCost(int betCount) {
-        if (betCount <= 0) {
-            throw new IllegalArgumentException("注数必须大于0");
-        }
         return betCount * PRICE_PER_BET;
+    }
+
+    /**
+     * 生成彩票ID
+     */
+    private int generateTicketId() {
+        List<Map<String, Object>> tickets = dataManager.getAllTickets();
+        int maxId = 0;
+        for (Map<String, Object> ticket : tickets) {
+            int id = ((Number) ticket.get("id")).intValue();
+            if (id > maxId) maxId = id;
+        }
+        return maxId + 1;
     }
 }

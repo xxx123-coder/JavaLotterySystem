@@ -1,24 +1,13 @@
 package lottery.service;
 
 import lottery.dao.DataManager;
-import lottery.model.LotteryResult;
-import lottery.model.Ticket;
-import lottery.util.NumberUtils;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
- * 抽奖服务类，处理抽奖和中奖判断逻辑
+ * 抽奖服务
  */
 public class LotteryService {
-    private final DataManager dataManager;
-
-    public LotteryService() {
-        // DataManager是单例模式，使用getInstance()
-        this.dataManager = DataManager.getInstance();
-    }
+    private DataManager dataManager;
 
     public LotteryService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -26,213 +15,157 @@ public class LotteryService {
 
     /**
      * 执行抽奖
-     * @return 中奖号码字符串
      */
-    public synchronized String drawLottery() {
-        System.out.println("[LotteryService] 开始执行抽奖...");
+    public String drawLottery() {
+        // 生成7个随机号码（1-36）
+        Set<Integer> numbers = new TreeSet<>();
+        Random random = new Random();
 
-        // 生成7个不重复的中奖号码（1-36随机）
-        int[] winningNumbersArray = NumberUtils.generateRandomNumbers(7, 1, 36);
-
-        // 确保号码排序（可选，便于比较）
-        java.util.Arrays.sort(winningNumbersArray);
-
-        // 转换为字符串格式
-        StringBuilder winningNumbersBuilder = new StringBuilder();
-        for (int i = 0; i < winningNumbersArray.length; i++) {
-            winningNumbersBuilder.append(winningNumbersArray[i]);
-            if (i < winningNumbersArray.length - 1) {
-                winningNumbersBuilder.append(",");
-            }
-        }
-        String winningNumbers = winningNumbersBuilder.toString();
-
-        System.out.println("[LotteryService] 生成中奖号码: " + winningNumbers);
-
-        // 获取所有未开奖的彩票
-        List<Ticket> allTickets = dataManager.getAllTickets();
-        System.out.println("[LotteryService] 当前彩票数量: " + allTickets.size());
-
-        List<LotteryResult> newResults = new ArrayList<>();
-        int totalWinningTickets = 0;
-
-        for (Ticket ticket : allTickets) {
-            // 判断是否中奖
-            String prizeLevel = checkWinning(ticket, winningNumbers);
-
-            if (!prizeLevel.equals("未中奖")) {
-                System.out.println("[LotteryService] 发现中奖彩票: ID=" + ticket.getId() +
-                        ", 用户ID=" + ticket.getUserId() + ", 等级=" + prizeLevel);
-
-                // 创建中奖结果记录
-                LotteryResult result = new LotteryResult();
-                result.setWinningNumbers(winningNumbers);
-                result.setDrawTime(new Date());
-                result.setWinnerUserId(ticket.getUserId());
-                result.setPrizeLevel(prizeLevel);
-                result.setMultiplier(1); // 默认倍数
-
-                // 注意：这些方法需要在LotteryResult类中添加
-                // result.setTicketId(ticket.getId()); // 记录关联的彩票ID
-
-                // 计算奖金
-                double prizeAmount = calculatePrizeAmount(prizeLevel) * ticket.getBetCount();
-                // result.setPrizeAmount(prizeAmount); // 需要在LotteryResult类中添加
-
-                // 保存中奖结果
-                dataManager.addResult(result);
-                newResults.add(result);
-
-                // 根据中奖等级给用户发放奖金
-                if (prizeAmount > 0) {
-                    UserService userService = new UserService(dataManager);
-                    boolean rechargeSuccess = userService.recharge(ticket.getUserId(), prizeAmount);
-                    System.out.println("[LotteryService] 奖金发放" + (rechargeSuccess ? "成功" : "失败") +
-                            ": 用户ID=" + ticket.getUserId() + ", 金额=" + prizeAmount);
-                }
-
-                totalWinningTickets++;
-            }
+        while (numbers.size() < 7) {
+            numbers.add(random.nextInt(36) + 1);
         }
 
-        // 记录抽奖日志
-        System.out.println("[LotteryService] 抽奖完成: 中奖号码=" + winningNumbers +
-                ", 中奖彩票数=" + totalWinningTickets +
-                ", 新增中奖记录=" + newResults.size());
+        // 格式化中奖号码
+        StringBuilder winningNumbers = new StringBuilder();
+        for (int num : numbers) {
+            winningNumbers.append(String.format("%02d ", num));
+        }
+        String result = winningNumbers.toString().trim();
 
-        return winningNumbers;
+        // 保存开奖结果
+        Map<String, Object> lotteryResult = new HashMap<>();
+        lotteryResult.put("id", generateResultId());
+        lotteryResult.put("period", getNextPeriod());
+        lotteryResult.put("winningNumbers", result);
+        lotteryResult.put("drawTime", new Date());
+
+        dataManager.addResult(lotteryResult);
+        return result;
     }
 
     /**
-     * 判断单张彩票是否中奖
-     * @param ticket 彩票对象
-     * @param winningNumbers 中奖号码字符串
-     * @return 中奖等级（特等奖/一等奖/二等奖/三等奖/未中奖）
+     * 获取所有开奖结果
      */
-    public String checkWinning(Ticket ticket, String winningNumbers) {
-        if (ticket == null || winningNumbers == null || winningNumbers.isEmpty()) {
-            return "未中奖";
-        }
-
-        // 解析彩票号码和中奖号码
-        String[] ticketNumberStrs = ticket.getNumbers().split(",");
-        String[] winningNumberStrs = winningNumbers.split(",");
-
-        // 验证号码数量
-        if (ticketNumberStrs.length != 7 || winningNumberStrs.length != 7) {
-            System.err.println("[LotteryService] 号码数量错误: 彩票=" + ticketNumberStrs.length +
-                    ", 开奖=" + winningNumberStrs.length);
-            return "未中奖";
-        }
-
-        int[] ticketNumbers = new int[ticketNumberStrs.length];
-        int[] winningNumbersArray = new int[winningNumberStrs.length];
-
-        try {
-            for (int i = 0; i < ticketNumberStrs.length; i++) {
-                ticketNumbers[i] = Integer.parseInt(ticketNumberStrs[i].trim());
-            }
-            for (int i = 0; i < winningNumberStrs.length; i++) {
-                winningNumbersArray[i] = Integer.parseInt(winningNumberStrs[i].trim());
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("[LotteryService] 号码格式错误: " + e.getMessage());
-            return "未中奖";
-        }
-
-        // 计算匹配数量
-        int matchCount = 0;
-        for (int ticketNum : ticketNumbers) {
-            for (int winningNum : winningNumbersArray) {
-                if (ticketNum == winningNum) {
-                    matchCount++;
-                    break;
-                }
-            }
-        }
-
-        // 确定中奖等级
-        switch (matchCount) {
-            case 7:
-                return "特等奖";
-            case 6:
-                return "一等奖";
-            case 5:
-                return "二等奖";
-            case 4:
-                return "三等奖";
-            default:
-                return "未中奖";
-        }
-    }
-
-    /**
-     * 计算奖金金额
-     * @param prizeLevel 中奖等级
-     * @return 奖金金额
-     */
-    private double calculatePrizeAmount(String prizeLevel) {
-        switch (prizeLevel) {
-            case "特等奖":
-                return 1000000.0;
-            case "一等奖":
-                return 50000.0;
-            case "二等奖":
-                return 1000.0;
-            case "三等奖":
-                return 100.0;
-            default:
-                return 0.0;
-        }
-    }
-
-    /**
-     * 获取用户的中奖记录
-     * @param userId 用户ID
-     * @return 中奖结果列表
-     */
-    public List<LotteryResult> getUserWinningResults(int userId) {
-        List<LotteryResult> userResults = new ArrayList<>();
-        List<LotteryResult> allResults = dataManager.getAllResults();
-
-        for (LotteryResult result : allResults) {
-            if (result.getWinnerUserId() == userId) {
-                userResults.add(result);
-            }
-        }
-
-        return userResults;
-    }
-
-    /**
-     * 新增：获取所有开奖结果
-     * @return 所有开奖结果列表
-     */
-    public List<LotteryResult> getAllLotteryResults() {
+    public List<Map<String, Object>> getAllLotteryResults() {
         return dataManager.getAllResults();
     }
 
     /**
-     * 新增：获取指定中奖号码的中奖彩票数量
-     * @param winningNumbers 中奖号码
-     * @return 中奖彩票数量
+     * 检查中奖情况
      */
-    public int getWinningTicketCount(String winningNumbers) {
-        if (winningNumbers == null || winningNumbers.isEmpty()) {
-            return 0;
-        }
+    public Map<String, Object> checkWinning(int userId, String winningNumbers) {
+        List<Map<String, Object>> userTickets = dataManager.getTicketsByUserId(userId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("hasWinning", false);
+        result.put("winnings", new ArrayList<Map<String, Object>>());
 
-        List<LotteryResult> allResults = dataManager.getAllResults();
-        int count = 0;
+        for (Map<String, Object> ticket : userTickets) {
+            String ticketNumbers = (String) ticket.get("numbers");
+            int matchCount = countMatchingNumbers(ticketNumbers, winningNumbers);
 
-        for (LotteryResult result : allResults) {
-            if (result.getWinningNumbers() != null &&
-                    result.getWinningNumbers().equals(winningNumbers) &&
-                    !result.getPrizeLevel().equals("未中奖")) {
-                count++;
+            if (matchCount > 0) {
+                Map<String, Object> winning = new HashMap<>();
+                winning.put("ticketId", ticket.get("id"));
+                winning.put("numbers", ticketNumbers);
+                winning.put("matchCount", matchCount);
+                winning.put("prizeLevel", getPrizeLevel(matchCount));
+                winning.put("prizeAmount", calculatePrize(matchCount,
+                        ((Number) ticket.get("betCount")).intValue()));
+
+                ((List<Map<String, Object>>) result.get("winnings")).add(winning);
+                result.put("hasWinning", true);
             }
         }
 
-        return count;
+        return result;
+    }
+
+    /**
+     * 获取用户中奖记录
+     */
+    public List<Map<String, Object>> getUserWinningResults(int userId) {
+        List<Map<String, Object>> allResults = dataManager.getAllResults();
+        List<Map<String, Object>> userWinnings = new ArrayList<>();
+
+        for (Map<String, Object> result : allResults) {
+            String winningNumbers = (String) result.get("winningNumbers");
+            Map<String, Object> checkResult = checkWinning(userId, winningNumbers);
+
+            if ((Boolean) checkResult.get("hasWinning")) {
+                Map<String, Object> winning = new HashMap<>();
+                winning.put("period", result.get("period"));
+                winning.put("winningNumbers", winningNumbers);
+                winning.put("drawTime", result.get("drawTime"));
+                winning.put("details", checkResult.get("winnings"));
+                userWinnings.add(winning);
+            }
+        }
+
+        return userWinnings;
+    }
+
+    /**
+     * 生成开奖结果ID
+     */
+    private int generateResultId() {
+        List<Map<String, Object>> results = dataManager.getAllResults();
+        int maxId = 0;
+        for (Map<String, Object> result : results) {
+            int id = ((Number) result.get("id")).intValue();
+            if (id > maxId) maxId = id;
+        }
+        return maxId + 1;
+    }
+
+    /**
+     * 获取下一期期号
+     */
+    private int getNextPeriod() {
+        List<Map<String, Object>> results = dataManager.getAllResults();
+        int maxPeriod = 0;
+        for (Map<String, Object> result : results) {
+            int period = ((Number) result.get("period")).intValue();
+            if (period > maxPeriod) maxPeriod = period;
+        }
+        return maxPeriod + 1;
+    }
+
+    /**
+     * 计算匹配号码数量
+     */
+    private int countMatchingNumbers(String ticketNumbers, String winningNumbers) {
+        Set<String> ticketSet = new HashSet<>(Arrays.asList(ticketNumbers.split(" ")));
+        Set<String> winningSet = new HashSet<>(Arrays.asList(winningNumbers.split(" ")));
+
+        ticketSet.retainAll(winningSet);
+        return ticketSet.size();
+    }
+
+    /**
+     * 获取中奖等级
+     */
+    private String getPrizeLevel(int matchCount) {
+        switch (matchCount) {
+            case 7: return "特等奖";
+            case 6: return "一等奖";
+            case 5: return "二等奖";
+            case 4: return "三等奖";
+            default: return "未中奖";
+        }
+    }
+
+    /**
+     * 计算奖金
+     */
+    private double calculatePrize(int matchCount, int betCount) {
+        double prizePerBet = 0;
+        switch (matchCount) {
+            case 7: prizePerBet = 5000000; break;
+            case 6: prizePerBet = 100000; break;
+            case 5: prizePerBet = 5000; break;
+            case 4: prizePerBet = 100; break;
+            default: return 0;
+        }
+        return prizePerBet * betCount;
     }
 }

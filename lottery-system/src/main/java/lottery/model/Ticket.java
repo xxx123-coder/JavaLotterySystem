@@ -13,7 +13,8 @@ public class Ticket {
     private int betCount;       // 投注数
     private Date purchaseTime;  // 购买时间
     private boolean isManual;   // 是否手动选号
-    private boolean drawn;
+    private String type;        // 彩票类型 - 添加此字段
+    private boolean drawn;      // 是否已开奖
 
     /**
      * 无参构造函数
@@ -23,12 +24,6 @@ public class Ticket {
 
     /**
      * 全参构造函数
-     * @param id 彩票ID
-     * @param userId 购买用户ID
-     * @param numbers 号码
-     * @param betCount 投注数
-     * @param purchaseTime 购买时间
-     * @param isManual 是否手动选号
      */
     public Ticket(int id, int userId, String numbers, int betCount, Date purchaseTime, boolean isManual) {
         this.id = id;
@@ -37,6 +32,7 @@ public class Ticket {
         this.betCount = betCount;
         this.purchaseTime = purchaseTime;
         this.isManual = isManual;
+        this.type = isManual ? "manual" : "random";
     }
 
     // Getter和Setter方法
@@ -86,6 +82,25 @@ public class Ticket {
 
     public void setManual(boolean manual) {
         isManual = manual;
+        this.type = manual ? "manual" : "random";
+    }
+
+    // 为了兼容ExcelDao，添加type的getter/setter
+    public String getType() {
+        return type != null ? type : (isManual ? "manual" : "random");
+    }
+
+    public void setType(String type) {
+        this.type = type;
+        this.isManual = "manual".equals(type);
+    }
+
+    public boolean isDrawn() {
+        return drawn;
+    }
+
+    public void setDrawn(boolean drawn) {
+        this.drawn = drawn;
     }
 
     @Override
@@ -98,12 +113,5 @@ public class Ticket {
                 ", purchaseTime=" + purchaseTime +
                 ", isManual=" + isManual +
                 '}';
-    }
-    public boolean isDrawn() {
-        return this.drawn; // 假设有 drawn 字段
-    }
-
-    public void setDrawn(boolean drawn) {
-        this.drawn = drawn;
     }
 }

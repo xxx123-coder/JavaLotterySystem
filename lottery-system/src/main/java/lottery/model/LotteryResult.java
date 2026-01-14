@@ -13,8 +13,11 @@ public class LotteryResult {
     private int winnerUserId;       // 中奖用户ID
     private String prizeLevel;      // 中奖等级（特等奖/一等奖）
     private int multiplier;         // 中奖倍数
-    private int ticketId;
-    private double prizeAmount;
+    private int ticketId;           // 彩票ID
+    private double prizeAmount;     // 奖金金额
+    private String period;          // 期号
+    private String numbers;         // 号码（与winningNumbers一致）
+    private String prizeInfo;       // 奖金信息
 
     /**
      * 无参构造函数
@@ -24,21 +27,20 @@ public class LotteryResult {
 
     /**
      * 全参构造函数
-     * @param id 结果ID
-     * @param winningNumbers 中奖号码
-     * @param drawTime 抽奖时间
-     * @param winnerUserId 中奖用户ID
-     * @param prizeLevel 中奖等级
-     * @param multiplier 中奖倍数
      */
     public LotteryResult(int id, String winningNumbers, Date drawTime, int winnerUserId,
-                         String prizeLevel, int multiplier) {
+                         String prizeLevel, int multiplier, int ticketId, double prizeAmount, String period) {
         this.id = id;
         this.winningNumbers = winningNumbers;
+        this.numbers = winningNumbers;
         this.drawTime = drawTime;
         this.winnerUserId = winnerUserId;
         this.prizeLevel = prizeLevel;
         this.multiplier = multiplier;
+        this.ticketId = ticketId;
+        this.prizeAmount = prizeAmount;
+        this.period = period;
+        this.prizeInfo = prizeLevel + " x" + multiplier;
     }
 
     // Getter和Setter方法
@@ -48,6 +50,9 @@ public class LotteryResult {
 
     public void setId(int id) {
         this.id = id;
+        if (this.period == null) {
+            this.period = String.valueOf(id);
+        }
     }
 
     public String getWinningNumbers() {
@@ -56,6 +61,7 @@ public class LotteryResult {
 
     public void setWinningNumbers(String winningNumbers) {
         this.winningNumbers = winningNumbers;
+        this.numbers = winningNumbers;
     }
 
     public Date getDrawTime() {
@@ -80,6 +86,7 @@ public class LotteryResult {
 
     public void setPrizeLevel(String prizeLevel) {
         this.prizeLevel = prizeLevel;
+        updatePrizeInfo();
     }
 
     public int getMultiplier() {
@@ -88,6 +95,53 @@ public class LotteryResult {
 
     public void setMultiplier(int multiplier) {
         this.multiplier = multiplier;
+        updatePrizeInfo();
+    }
+
+    public int getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(int ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public double getPrizeAmount() {
+        return prizeAmount;
+    }
+
+    public void setPrizeAmount(double prizeAmount) {
+        this.prizeAmount = prizeAmount;
+    }
+
+    public String getPeriod() {
+        return period != null ? period : String.valueOf(id);
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
+    public String getNumbers() {
+        return numbers != null ? numbers : winningNumbers;
+    }
+
+    public void setNumbers(String numbers) {
+        this.numbers = numbers;
+        this.winningNumbers = numbers;
+    }
+
+    public String getPrizeInfo() {
+        return prizeInfo != null ? prizeInfo : (prizeLevel + " x" + multiplier);
+    }
+
+    public void setPrizeInfo(String prizeInfo) {
+        this.prizeInfo = prizeInfo;
+    }
+
+    // 更新奖金信息
+    private void updatePrizeInfo() {
+        this.prizeInfo = prizeLevel + " x" + multiplier;
     }
 
     @Override
@@ -99,17 +153,9 @@ public class LotteryResult {
                 ", winnerUserId=" + winnerUserId +
                 ", prizeLevel='" + prizeLevel + '\'' +
                 ", multiplier=" + multiplier +
+                ", ticketId=" + ticketId +
+                ", prizeAmount=" + prizeAmount +
+                ", period='" + period + '\'' +
                 '}';
-    }
-    public void setTicketId(int ticketId) {
-        this.ticketId = ticketId; // 假设有 ticketId 字段
-    }
-
-    public void setPrizeAmount(double prizeAmount) {
-        this.prizeAmount = prizeAmount; // 假设有 prizeAmount 字段
-    }
-
-    public double getPrizeAmount() {
-        return this.prizeAmount;
     }
 }
