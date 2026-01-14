@@ -20,12 +20,29 @@ public class UserService {
     public Map<String, Object> login(String username, String password) {
         Map<String, Object> user = dataManager.findUserByUsername(username);
         if (user != null && user.get("password").equals(password)) {
-            // 新增：检查未读中奖通知
-            List<Map<String, Object>> unreadWinnings = dataManager.getUnreadWinningsByUserId(
-                    ((Number) user.get("id")).intValue()
-            );
-            user.put("unreadWinnings", unreadWinnings);
-            user.put("unreadWinningCount", unreadWinnings.size());
+            // 获取用户ID
+            Integer userId = null;
+            Object idObj = user.get("id");
+            if (idObj instanceof Integer) {
+                userId = (Integer) idObj;
+            } else if (idObj instanceof Double) {
+                userId = ((Double) idObj).intValue();
+            }
+
+            if (userId != null) {
+                // 新增：检查未读中奖通知
+                List<Map<String, Object>> unreadWinnings = dataManager.getUnreadWinningsByUserId(userId);
+                user.put("unreadWinnings", unreadWinnings);
+                user.put("unreadWinningCount", unreadWinnings.size());
+
+                // 确保所有必要字段都存在
+                if (!user.containsKey("username")) {
+                    user.put("username", username);
+                }
+                if (!user.containsKey("balance")) {
+                    user.put("balance", 0.0);
+                }
+            }
 
             return user;
         }
@@ -79,6 +96,11 @@ public class UserService {
             List<Map<String, Object>> unreadWinnings = dataManager.getUnreadWinningsByUserId(userId);
             user.put("unreadWinnings", unreadWinnings);
             user.put("unreadWinningCount", unreadWinnings.size());
+
+            // 确保所有必要字段都存在
+            if (!user.containsKey("balance")) {
+                user.put("balance", 0.0);
+            }
         }
         return user;
     }

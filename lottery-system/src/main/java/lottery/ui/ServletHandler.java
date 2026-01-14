@@ -23,6 +23,12 @@ public class ServletHandler {
     private LotteryService lotteryService;
     private PageGenerator pageGenerator;
 
+    // 会话管理：当前登录用户ID
+    private Integer currentUserId = null;
+
+    // 会话管理：已登录用户信息缓存
+    private Map<String, Integer> userSessions = new HashMap<>();
+
     /**
      * 构造函数
      */
@@ -60,9 +66,11 @@ public class ServletHandler {
 
         System.out.println("请求路径: " + path + ", 方法: " + method);
 
-        // 解析参数
+        // 解析所有参数（GET和POST）
         Map<String, String> params = new HashMap<>();
-        if ("POST".equalsIgnoreCase(method)) {
+        if ("GET".equalsIgnoreCase(method)) {
+            params = parseGetParams(exchange);
+        } else if ("POST".equalsIgnoreCase(method)) {
             params = parsePostParams(exchange);
         }
 
@@ -93,7 +101,12 @@ public class ServletHandler {
                 if ("POST".equalsIgnoreCase(method)) {
                     response = handleBuyTicket(params);
                 } else {
-                    response = pageGenerator.generateBuyTicketPage();
+                    // 检查是否已登录
+                    if (currentUserId == null) {
+                        response = generateRedirectToLogin();
+                    } else {
+                        response = pageGenerator.generateBuyTicketPage(currentUserId);
+                    }
                 }
                 break;
             case "/draw":
@@ -118,12 +131,16 @@ public class ServletHandler {
                 if ("POST".equalsIgnoreCase(method)) {
                     response = handleRecharge(params);
                 } else {
-                    response = pageGenerator.generateRechargePage();
+                    // 检查是否已登录
+                    if (currentUserId == null) {
+                        response = generateRedirectToLogin();
+                    } else {
+                        response = pageGenerator.generateRechargePage(currentUserId);
+                    }
                 }
                 break;
             case "/logout":
                 response = handleLogout();
-                contentType = "text/plain";
                 break;
             default:
                 response = generateErrorPage("404 - 页面未找到");
@@ -153,7 +170,12 @@ public class ServletHandler {
 
         Map<String, Object> user = userService.login(username, password);
         if (user != null) {
-            // 登录成功，跳转到主页面
+            // 登录成功，设置当前用户ID
+            Integer userId = ((Number) user.get("id")).intValue();
+            currentUserId = userId;
+            System.out.println("用户登录成功: " + username + ", ID: " + userId);
+
+            // 跳转到主页面
             return pageGenerator.generateMainPage(user);
         } else {
             return pageGenerator.generateLoginPage("用户名或密码错误");
@@ -185,7 +207,14 @@ public class ServletHandler {
      * 处理主页面
      */
     private String handleMain(Map<String, String> params) {
-        // 简化处理，实际需要会话管理
+        // 如果当前用户已登录，显示用户信息
+        if (currentUserId != null) {
+            Map<String, Object> user = userService.getUserInfo(currentUserId);
+            if (user != null) {
+                return pageGenerator.generateMainPage(user);
+            }
+        }
+        // 否则显示无用户信息的主页
         return pageGenerator.generateMainPage(null);
     }
 
@@ -194,7 +223,12 @@ public class ServletHandler {
      */
     private String handleBuyTicket(Map<String, String> params) {
         try {
-            int userId = Integer.parseInt(params.get("userId"));
+            // 从当前会话获取用户ID
+            if (currentUserId == null) {
+                return generateRedirectToLogin();
+            }
+
+            int userId = currentUserId;
             String ticketType = params.get("ticketType");
             String numbers = params.get("numbers");
             int betCount = Integer.parseInt(params.get("betCount"));
@@ -243,8 +277,14 @@ public class ServletHandler {
      */
     private String handleMyTickets(Map<String, String> params) {
         try {
-            int userId = Integer.parseInt(params.get("userId"));
-            return pageGenerator.generateMyTicketsPage(ticketService.getUserTickets(userId));
+            // 从当前会话获取用户ID
+            if (currentUserId == null) {
+                return generateRedirectToLogin();
+            }
+
+            int userId = currentUserId;
+            List<Map<String, Object>> userTickets = ticketService.getUserTickets(userId);
+            return pageGenerator.generateMyTicketsPage(userTickets);
         } catch (Exception e) {
             return generateErrorPage(e.getMessage());
         }
@@ -255,7 +295,12 @@ public class ServletHandler {
      */
     private String handleCheckWinning(Map<String, String> params) {
         try {
-            int userId = Integer.parseInt(params.get("userId"));
+            // 从当前会话获取用户ID
+            if (currentUserId == null) {
+                return generateRedirectToLogin();
+            }
+
+            int userId = currentUserId;
             List<Map<String, Object>> allWinnings = userService.getUserWinnings(userId);
             List<Map<String, Object>> unreadWinnings = lotteryService.getUserWinningNotifications(userId);
 
@@ -270,7 +315,15 @@ public class ServletHandler {
      */
     private String handleMarkAsRead(Map<String, String> params) {
         try {
-            int userId = Integer.parseInt(params.get("userId"));
+            // 从当前会话获取用户ID
+            if (currentUserId == null) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", false);
+                result.put("message", "用户未登录");
+                return generateJsonResponse(result);
+            }
+
+            int userId = currentUserId;
             boolean success = userService.markNotificationsAsRead(userId);
 
             Map<String, Object> result = new HashMap<>();
@@ -290,7 +343,12 @@ public class ServletHandler {
      */
     private String handleRecharge(Map<String, String> params) {
         try {
-            int userId = Integer.parseInt(params.get("userId"));
+            // 从当前会话获取用户ID
+            if (currentUserId == null) {
+                return generateRedirectToLogin();
+            }
+
+            int userId = currentUserId;
             double amount = Double.parseDouble(params.get("amount"));
 
             boolean success = userService.recharge(userId, amount);
@@ -317,8 +375,27 @@ public class ServletHandler {
      * 处理登出
      */
     private String handleLogout() {
-        // 清除会话等操作
-        return "登出成功";
+        System.out.println("用户退出登录: ID=" + currentUserId);
+        currentUserId = null;
+
+        // 生成重定向到登录页面的HTML
+        String html = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<title>退出登录</title>" +
+                "<script>" +
+                "setTimeout(function() {" +
+                "  window.location.href = '/login';" +
+                "}, 1500);" +
+                "</script>" +
+                "</head>" +
+                "<body>" +
+                "<h1>退出登录成功</h1>" +
+                "<p>正在跳转到登录页面...</p>" +
+                "</body>" +
+                "</html>";
+        return html;
     }
 
     /**
@@ -338,6 +415,32 @@ public class ServletHandler {
                     String key = URLDecoder.decode(keyValue[0], "UTF-8");
                     String value = URLDecoder.decode(keyValue[1], "UTF-8");
                     params.put(key, value);
+                }
+            }
+        }
+
+        return params;
+    }
+
+    /**
+     * 解析GET参数
+     */
+    private Map<String, String> parseGetParams(HttpExchange exchange) {
+        Map<String, String> params = new HashMap<>();
+        String query = exchange.getRequestURI().getQuery();
+
+        if (query != null && !query.isEmpty()) {
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    try {
+                        String key = URLDecoder.decode(keyValue[0], "UTF-8");
+                        String value = URLDecoder.decode(keyValue[1], "UTF-8");
+                        params.put(key, value);
+                    } catch (Exception e) {
+                        // 忽略解码错误
+                    }
                 }
             }
         }
@@ -389,5 +492,26 @@ public class ServletHandler {
      */
     private String generateErrorPage(String message) {
         return pageGenerator.generateErrorPage(message);
+    }
+
+    /**
+     * 生成重定向到登录页面的响应
+     */
+    private String generateRedirectToLogin() {
+        String html = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<title>需要登录</title>" +
+                "<script>" +
+                "alert('请先登录系统！');" +
+                "window.location.href = '/login';" +
+                "</script>" +
+                "</head>" +
+                "<body>" +
+                "<p>正在跳转到登录页面...</p>" +
+                "</body>" +
+                "</html>";
+        return html;
     }
 }

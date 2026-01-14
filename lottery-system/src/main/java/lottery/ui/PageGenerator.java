@@ -100,12 +100,12 @@ public class PageGenerator {
     /**
      * 生成购票页面
      */
-    public String generateBuyTicketPage() {
+    public String generateBuyTicketPage(int userId) {
         String html = generateHeader("购买彩票");
         html += "<div style='padding: 20px;'>";
         html += "<h1>购买彩票</h1>";
         html += "<form method='POST' action='/buy-ticket'>";
-        html += "<input type='hidden' name='userId' value='1'>";
+        html += "<input type='hidden' name='userId' value='" + userId + "'>";
 
         html += "<div style='margin: 10px 0;'>";
         html += "投注方式: ";
@@ -286,12 +286,12 @@ public class PageGenerator {
     /**
      * 生成充值页面
      */
-    public String generateRechargePage() {
+    public String generateRechargePage(int userId) {
         String html = generateHeader("账户充值");
         html += "<div style='padding: 20px; max-width: 300px; margin: 0 auto;'>";
         html += "<h1>账户充值</h1>";
         html += "<form method='POST' action='/recharge'>";
-        html += "<input type='hidden' name='userId' value='1'>";
+        html += "<input type='hidden' name='userId' value='" + userId + "'>";
         html += "充值金额: <input type='number' name='amount' min='1' step='0.01' required><br><br>";
         html += "<button type='submit'>确认充值</button>";
         html += "</form>";
