@@ -8,13 +8,13 @@ import java.util.Properties;
  */
 public class FileUtils {
     // 配置文件路径
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String CONFIG_FILE = "C:\\Users\\Administrator\\Desktop\\JAVA课设\\lottery-system\\doc\\config.properties";
 
     // 配置文件缓存
     private static Properties configCache = null;
 
-    // 路径常量
-    private static final String DATA_DIR = "data";
+    // 路径常量 - 修改为完整桌面路径
+    private static final String DATA_DIR = "C:\\Users\\Administrator\\Desktop\\JAVA课设\\lottery-system\\doc";
     private static final String LOGS_DIR = DATA_DIR + File.separator + "logs";
 
     /**
@@ -45,6 +45,13 @@ public class FileUtils {
     }
 
     /**
+     * 获取文档目录路径
+     */
+    public static String getDocDir() {
+        return DATA_DIR;
+    }
+
+    /**
      * 加载配置文件
      */
     public static synchronized Properties loadConfig() {
@@ -55,8 +62,11 @@ public class FileUtils {
         configCache = new Properties();
 
         try {
-            // 从当前目录加载配置文件
+            // 从文档目录加载配置文件
             File configFile = new File(CONFIG_FILE);
+
+            // 确保目录存在
+            configFile.getParentFile().mkdirs();
 
             if (configFile.exists()) {
                 try (InputStream input = new FileInputStream(configFile)) {
@@ -86,10 +96,11 @@ public class FileUtils {
         configCache = new Properties();
         // 设置最小必要配置
         configCache.setProperty("server.port", "8080");
-        configCache.setProperty("data.dir", "data");
+        configCache.setProperty("data.dir", DATA_DIR);
         configCache.setProperty("excel.users.file", "users.xlsx");
         configCache.setProperty("excel.tickets.file", "tickets.xlsx");
         configCache.setProperty("excel.results.file", "results.xlsx");
+        configCache.setProperty("excel.winnings.file", "winnings.xlsx");
         configCache.setProperty("log.level", "INFO");
         configCache.setProperty("lottery.numbers.count", "7");
         configCache.setProperty("lottery.max.number", "36");
@@ -100,9 +111,14 @@ public class FileUtils {
      * 保存默认配置到文件
      */
     private static void saveDefaultConfig() {
-        try (FileOutputStream output = new FileOutputStream(CONFIG_FILE)) {
-            configCache.store(output, "Lottery System Configuration");
-            System.out.println("[INFO] 创建默认配置文件: " + CONFIG_FILE);
+        try {
+            // 确保目录存在
+            new File(CONFIG_FILE).getParentFile().mkdirs();
+
+            try (FileOutputStream output = new FileOutputStream(CONFIG_FILE)) {
+                configCache.store(output, "Lottery System Configuration");
+                System.out.println("[INFO] 创建默认配置文件: " + CONFIG_FILE);
+            }
         } catch (IOException e) {
             System.err.println("[ERROR] 无法创建配置文件: " + e.getMessage());
         }
@@ -179,6 +195,13 @@ public class FileUtils {
      */
     public static String getResultFilePath() {
         return DATA_DIR + File.separator + getConfigValue("excel.results.file", "results.xlsx");
+    }
+
+    /**
+     * 获取中奖记录文件路径
+     */
+    public static String getWinningFilePath() {
+        return DATA_DIR + File.separator + getConfigValue("excel.winnings.file", "winnings.xlsx");
     }
 
     /**

@@ -1,5 +1,6 @@
 package lottery.dao;
 
+import lottery.util.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
@@ -12,7 +13,8 @@ import java.util.*;
  * Excel数据访问层
  */
 public class ExcelDao {
-    private static final String DATA_DIR = "data";
+    // 使用FileUtils获取数据目录
+    private static final String DATA_DIR = FileUtils.getDataDir();
 
     // Excel文件路径
     private String usersFile;
@@ -22,10 +24,12 @@ public class ExcelDao {
 
     public ExcelDao() {
         createDataDirectory();
-        usersFile = DATA_DIR + "/users.xlsx";
-        ticketsFile = DATA_DIR + "/tickets.xlsx";
-        resultsFile = DATA_DIR + "/results.xlsx";
-        winningsFile = DATA_DIR + "/winnings.xlsx"; // 新增
+
+        // 使用FileUtils获取完整文件路径
+        usersFile = FileUtils.getUserFilePath();
+        ticketsFile = FileUtils.getTicketFilePath();
+        resultsFile = FileUtils.getResultFilePath();
+        winningsFile = FileUtils.getWinningFilePath(); // 使用新增的方法
 
         // 初始化Excel文件（如果不存在则创建）
         initializeExcelFiles();
@@ -35,14 +39,8 @@ public class ExcelDao {
      * 创建数据目录
      */
     private void createDataDirectory() {
-        File dir = new File(DATA_DIR);
-        if (!dir.exists()) {
-            System.out.println("创建数据目录: " + DATA_DIR);
-            boolean created = dir.mkdirs();
-            if (!created) {
-                System.err.println("无法创建数据目录: " + DATA_DIR);
-            }
-        }
+        // 使用FileUtils确保目录存在
+        FileUtils.ensureAllDirectories();
     }
 
     /**
@@ -66,9 +64,14 @@ public class ExcelDao {
                             "prizeLevel", "prizeAmount", "winTime", "isNotified"));
 
             System.out.println("Excel文件初始化完成");
+            System.out.println("用户文件位置: " + usersFile);
+            System.out.println("彩票文件位置: " + ticketsFile);
+            System.out.println("开奖结果文件位置: " + resultsFile);
+            System.out.println("中奖记录文件位置: " + winningsFile);
 
         } catch (Exception e) {
             System.err.println("初始化Excel文件失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -79,6 +82,9 @@ public class ExcelDao {
         File file = new File(filePath);
         if (!file.exists()) {
             System.out.println("创建文件: " + filePath);
+
+            // 确保父目录存在
+            file.getParentFile().mkdirs();
 
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Data");
@@ -160,6 +166,9 @@ public class ExcelDao {
      */
     private void saveToExcel(String filePath, List<Map<String, Object>> data, List<String> headers)
             throws IOException {
+        // 确保目录存在
+        new File(filePath).getParentFile().mkdirs();
+
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sheet1");
 
